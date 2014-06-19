@@ -41,15 +41,46 @@
 		</div>
 
 		<div class="screens">
-			<iframe id="main" class="game screen screen-main"></iframe>
+			<div class="screen screen-main">
+				<div class="wrapper">
+					<div class="handle drag-handle">
+						<span class="glyphicon glyphicon-move"></span>						
+					</div>
+					<div class="handle resize-handle">
+						<span class="glyphicon glyphicon-resize-full"></span>
+					</div>
+					<iframe id="main" class="game"></iframe>
+				</div>
+			</div>
 			<div class="secondary">
-				<iframe id="second" class="game screen screen-second"></iframe>
-				<iframe id="third" class="overview screen screen-third" src="overview.html"></iframe>
+				<div class="screen screen-second">
+					<div class="wrapper">
+						<div class="handle drag-handle">
+							<span class="glyphicon glyphicon-move"></span>						
+						</div>
+						<div class="handle resize-handle">
+							<span class="glyphicon glyphicon-resize-full"></span>
+						</div>
+						<iframe id="second" class="game"></iframe>
+					</div>
+				</div>
+				<div class="screen screen-overview">
+					<div class="wrapper">
+						<div class="handle drag-handle">
+							<span class="glyphicon glyphicon-move"></span>						
+						</div>
+						<div class="handle resize-handle">
+							<span class="glyphicon glyphicon-resize-full"></span>
+						</div>
+						<iframe id="overview" class="overview" src="overview.html"></iframe>
+					</div>
+				</div>
 			</div>
 		</div>
 
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="jqDnR.js"></script>
 		<script src="purl.js"></script>
 
 		<script src="index.js"></script>
