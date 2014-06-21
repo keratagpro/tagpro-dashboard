@@ -1,0 +1,68 @@
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  text-align: right;
+}
+.footer .text-muted {
+  color: #333;
+}
+
+.page-overview {
+  background-color: black;
+  color: white;
+}
+
+.overview-table .score {
+  font-size: 300%;
+  text-align: center;
+}
+.overview-table .title {
+  width: 10%;
+  white-space: nowrap;
+}
+.overview-table .red, .overview-table .blue {
+  width: 45%;
+}
+.overview-table .red {
+  text-align: right;
+}
+.overview-table .player {
+  font-size: 16px;
+  line-height: 22px;
+}
+.overview-table .player .dead {
+  color: red;
+}
+.overview-table .player.red .icons {
+  float: left;
+}
+.overview-table .player.blue .icons {
+  float: right;
+}
+.overview-table .player .icons {
+  white-space: nowrap;
+}
+
+.sprite-tiles {
+  background-image: url("http://maptest.newcompte.fr/images/tiles.png");
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+}
+
+.sprite-redball {
+  background-position: -560px 0;
+}
+
+.sprite-blueball {
+  background-position: -600px 0;
+}
+
+.sprite-small {
+  zoom: 0.5;
+}
+
+.sprite-flair {
+  background-image: url("http://maptest.newcompte.fr/images/flair.png");
+}

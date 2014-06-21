@@ -104,6 +104,11 @@ var Game = function() {
 		return score;
 	};
 
+	this.bookmarkletLink = ko.computed(function() {
+		return "javascript:void(window.open('" + location.href +
+			"?host='+encodeURIComponent(location.host),'_blank','width=500,height=500,location=no,menubar=no,titlebar=no'));";
+	});
+
 	this.getTimeFromSeconds = function(sec) {
 		var hours = parseInt(sec / 3600, 10) % 24;
 		var minutes = parseInt(sec / 60, 10) % 60;
@@ -211,7 +216,7 @@ var requestSocketUrl = function() {
 
 $(function() {
 	var url = $.url();
-	var host = url.param('host') || "maptest.newcompte.fr:8000";
+	var host = url.param('host');
 
 	game = new Game();
 	ko.applyBindings(game);
