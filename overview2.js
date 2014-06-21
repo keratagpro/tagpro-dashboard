@@ -85,7 +85,7 @@ var Player = function(data) {
 };
 
 var Game = function() {
-	this.score = ko.observable();
+	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
 
 	this.removePlayer = function(id) {
