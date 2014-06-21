@@ -216,7 +216,7 @@ $(function() {
 	game = new Game();
 	ko.applyBindings(game);
 
-	if (port) {
+	if (host) {
 		createSocket("http://" + host);
 	}
 });
