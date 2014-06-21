@@ -211,13 +211,12 @@ var requestSocketUrl = function() {
 
 $(function() {
 	var url = $.url();
-	var host = url.param('host') || "maptest.newcompte.fr";
-	var port = url.param('port') || 8000;
+	var host = url.param('host') || "maptest.newcompte.fr:8000";
 
 	game = new Game();
 	ko.applyBindings(game);
 
 	if (port) {
-		createSocket("http://" + host + ":" + port);
+		createSocket("http://" + host);
 	}
 });
