@@ -1,6 +1,5 @@
 var socket;
 var game;
-var settings;
 
 var tiles = {
 	redball: { x: 14, y: 0 },
@@ -80,7 +79,6 @@ var Player = function(options) {
 var Game = function() {
 	this.score = ko.observable();
 	this.players = ko.observableArray();
-	this.settings = ko.observable(settings);
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -191,18 +189,13 @@ var requestSocketUrl = function() {
 
 $(function() {
 	var url = $.url();
-	var group = url.param('group');
-	var port = url.param('port');
-	var stats = (url.param('stats') || '').split(',');
-
-	settings = {
-		stats: stats
-	};
+	var host = url.param('host') || "maptest.newcompte.fr";
+	var port = url.param('port') || 8000;
 
 	game = new Game();
 	ko.applyBindings(game);
 
 	if (port) {
-		createSocket("http://maptest.newcompte.fr:" + port);
+		createSocket("http://" + host + ":" + port);
 	}
 });
