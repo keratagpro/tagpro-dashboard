@@ -72,14 +72,16 @@
 		<script src="purl.js"></script>
 
 		<script type="text/html" id="player-template">
-			<div class="icons">
-				<span class="flag sprite-tiles sprite-small" data-bind="visible: flag, style: spriteFlag"></span>
-				<span class="flair sprite-tiles sprite-small" data-bind="visible: flair, style: spriteFlair"></span>
-				<span class="grip sprite-tiles sprite-small" data-bind="visible: grip, style: spriteGrip"></span>
-				<span class="bomb sprite-tiles sprite-small" data-bind="visible: bomb, style: spriteBomb"></span>
-				<span class="tagpro sprite-tiles sprite-small" data-bind="visible: tagpro, style: spriteTagpro"></span>
-			</div>
-			<span class="name" data-bind="text: name, css: { dead: dead }, attr: { title: title }"></span>
+			<p>
+				<span class="icons">
+					<span class="flag sprite-tiles sprite-small" data-bind="visible: flag, style: spriteFlag"></span>
+					<span class="flair sprite-tiles sprite-small" data-bind="visible: flair, style: spriteFlair"></span>
+					<span class="grip sprite-tiles sprite-small" data-bind="visible: grip, style: spriteGrip"></span>
+					<span class="bomb sprite-tiles sprite-small" data-bind="visible: bomb, style: spriteBomb"></span>
+					<span class="tagpro sprite-tiles sprite-small" data-bind="visible: tagpro, style: spriteTagpro"></span>
+				</span>
+				<span class="name" data-bind="text: name, css: { dead: dead }, attr: { title: title }"></span>
+			</p>
 		</script>
 
 		<script src="overview2.js"></script>
