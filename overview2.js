@@ -12,17 +12,6 @@ var tiles = {
 	tagpro: { x: 12, y: 6 }
 };
 
-var gameMapping = {
-	'players': {
-		key: function(data) {
-			return ko.utils.unwrapObservable(data.id);
-		},
-		create: function(options) {
-			return new Player(options);
-		}
-	}
-};
-
 var powerupUpdate = {
 	update: function(options) {
 		if (options.data)
@@ -38,10 +27,20 @@ var playerMapping = {
 	'tagpro': powerupUpdate
 };
 
-var Player = function(options) {
+var attributes = ["id", "name", "team", "flag", "grip", "speed", "tagpro", "bomb",
+	"dead", "directSet", "s-tags", "s-pops", "s-grabs", "s-returns", "s-captures",
+	"s-drops", "s-support", "s-hold", "s-prevent", "score", "points", "up", "down",
+	"left", "right", "ms", "ac", "auth", "flair", "den", "degree", "rx", "ry",
+	"lx", "ly", "a", "ra", "draw"];
+
+var Player = function(data) {
+	attributes.forEach(function(attr) {
+		this[attr] = ko.observable();
+	}.bind(this));
+
 	this.powerupGrabs = ko.observable(0);
 
-	ko.mapping.fromJS(options.data, playerMapping, this);
+	ko.mapping.fromJS(data, playerMapping, this);
 
 	this.getSprite = function(sprite) {
 		var tile = tiles[sprite];
@@ -50,11 +49,14 @@ var Player = function(options) {
 	};
 
 	this.getFlair = function(flair) {
-		var position = (-flair.x * 16) + "px " + (-flair.y * 16) + "px";
+		var position = (-flair.x() * 16) + "px " + (-flair.y() * 16) + "px";
 		return { backgroundPosition: position };
 	};
 
 	this.spriteFlag = ko.computed(function() {
+		if (!this.flag)
+			return null;
+
 		var flag = this.flag();
 		return this.getSprite(flag == 1 ? 'redflag' : flag == 2 ? 'blueflag' : 'yellowflag');
 	}, this);
@@ -66,14 +68,20 @@ var Player = function(options) {
 		return this.getFlair(this.flair());
 	}, this);
 
-	this.spriteBall = ko.computed(function() { return this.getSprite(this.team() == 1 ? "redball" : "blueball"); }, this);
+	this.spriteBall = ko.computed(function() {
+		if (!this.team)
+			return null;
+
+		return this.getSprite(this.team() == 1 ? "redball" : "blueball");
+	}, this);
+
 	this.spriteGrip = ko.computed(function() { return this.getSprite('grip'); }, this);
 	this.spriteBomb = ko.computed(function() { return this.getSprite('bomb'); }, this);
 	this.spriteTagpro = ko.computed(function() { return this.getSprite('tagpro'); }, this);
 
-	this.title = ko.computed = function() {
+	this.title = ko.computed(function() {
 		return this.degree();
-	};
+	}, this);
 };
 
 var Game = function() {
@@ -82,7 +90,7 @@ var Game = function() {
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
-			return player.id == id;
+			return player.id() == id;
 		});
 	}.bind(this);
 
@@ -112,13 +120,13 @@ var Game = function() {
 
 	this.playersRed = ko.computed(function() {
 		return ko.utils.arrayFilter(this.players(), function(player) {
-			return player.team() == 1;
+			return player.team && player.team() == 1;
 		});
 	}, this);
 
 	this.playersBlue = ko.computed(function() {
 		return ko.utils.arrayFilter(this.players(), function(player) {
-			return player.team() == 2;
+			return player.team && player.team() == 2;
 		});
 	}, this);
 
@@ -159,7 +167,7 @@ var createSocket = function(url) {
 	socket = io.connect(url + "?r=" + Math.round(Math.random() * 1e7), { reconnect: false });
 
 	socket.on('score', function(score) {
-		ko.mapping.fromJS({ score: score }, gameMapping, game);
+		ko.mapping.fromJS({ score: score }, { }, game);
 	});
 
 	socket.on('p', function(p) {
@@ -167,7 +175,21 @@ var createSocket = function(url) {
 			return;
 		}
 
-		ko.mapping.fromJS({ players: p }, gameMapping, game);
+		if (!p[0].id)
+			return;
+
+		p.forEach(function(playerData) {
+			var player = ko.utils.arrayFirst(game.players(), function(p1) {
+				return p1.id() == playerData.id;
+			});
+
+			if (player) {
+				ko.mapping.fromJS(playerData, playerMapping, player);
+			}
+			else {
+				game.players.push(new Player(playerData));
+			}
+		});
 	});
 
 	socket.on('playerLeft', function(id) {

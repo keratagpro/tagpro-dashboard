@@ -149,6 +149,13 @@ iframe {
   height: 40px;
 }
 
+.sprite-flair {
+  background-image: url("http://maptest.newcompte.fr/images/flair.png");
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
 .sprite-redball {
   background-position: -560px 0;
 }
@@ -159,8 +166,4 @@ iframe {
 
 .sprite-small {
   zoom: 0.5;
-}
-
-.sprite-flair {
-  background-image: url("http://maptest.newcompte.fr/images/flair.png");
 }
