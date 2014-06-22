@@ -318,6 +318,12 @@ var Game = function(data) {
 		if (!history.replaceState) return;
 		history.replaceState(null, null, this.currentUrl());
 	}.bind(this));
+
+	this.reset = function() {
+		this.players.removeAll();
+		this.score().red(0);
+		this.score().blue(0);
+	}.bind(this);
 };
 
 var createGroupSocket = function(url) {
@@ -363,7 +369,21 @@ var createSocket = function(url) {
 		socket.disconnect();
 	}
 
-	socket = io.connect(url + "?r=" + Math.round(Math.random() * 1e7), { reconnect: false });
+	var socketUrl = url + (url.indexOf("?") === -1 ? "?" : "&") + "r=" + Math.round(Math.random() * 1e7);
+
+	socket = io.connect(socketUrl, { reconnect: false });
+
+	socket.on('groupId', function(groupId) {
+		if (!groupId) {
+			if (url.indexOf("spectator=true") !== -1)
+				return;
+
+			console.log('Reconnecting as spectator.');
+			game.reset();
+
+			createSocket(url + (url.indexOf("?") === -1 ? "?" : "&") + "spectator=true");
+		}
+	});
 
 	socket.on('score', function(score) {
 		ko.mapping.fromJS({ score: score }, { }, game);
