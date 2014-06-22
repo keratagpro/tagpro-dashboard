@@ -156,11 +156,6 @@ var Game = function(data) {
 		return "?" + parts.join("&");
 	}, this, { deferEvaluation: true });
 
-	this.updateUrl = function() {
-		if (!history.replaceState) return;
-		history.replaceState(null, null, this.currentUrl());
-	}.bind(this);
-
 	this.selectedStats = ko.observableArray();
 
 	this.allStats = ko.mapping.fromJS(attributeLabelsArray, {
@@ -213,8 +208,6 @@ var Game = function(data) {
 	this.selectedStatsString = ko.computed(function() {
 		return this.selectedStatIds().join(',');
 	}, this);
-
-	this.selectedStatsString.subscribe(this.updateUrl);
 
 	this.getStatLabel = function(stat) {
 		if (!attributeLabels[stat])
@@ -308,9 +301,10 @@ var Game = function(data) {
 		return parts.join(",");
 	}, this);
 
-	this.showAuth.subscribe(this.updateUrl);
-	this.showFlair.subscribe(this.updateUrl);
-	this.showDegree.subscribe(this.updateUrl);
+	this.currentUrl.subscribe(function() {
+		if (!history.replaceState) return;
+		history.replaceState(null, null, this.currentUrl());
+	}.bind(this));
 };
 
 var createSocket = function(url) {
