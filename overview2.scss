@@ -104,6 +104,8 @@ body {
 
 .sprite-small {
 	zoom: 0.5;
+	-moz-transform: scale(0.5);
+	-moz-transform-origin: 0 0;
 }
 
 .sprite-flair {
