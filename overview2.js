@@ -294,13 +294,18 @@ var Game = function(data) {
 		});
 	}, this);
 
-	var playerInfo = (data.player && data.player.split(',')) || ['auth', 'flair'];
+	var playerInfo = (data.player !== undefined && data.player.split(',')) || ['score', 'auth', 'flair'];
+	this.showScore = ko.observable($.inArray('score', playerInfo) !== -1);
 	this.showAuth = ko.observable($.inArray('auth', playerInfo) !== -1);
 	this.showFlair = ko.observable($.inArray('flair', playerInfo) !== -1);
 	this.showDegree = ko.observable($.inArray('degree', playerInfo) !== -1);
 
 	this.selectedPlayerInfoString = ko.computed(function() {
 		var parts = [];
+
+		if (this.showScore())
+			parts.push("score");
+
 		if (this.showAuth())
 			parts.push("auth");
 
@@ -321,8 +326,8 @@ var Game = function(data) {
 
 	this.reset = function() {
 		this.players.removeAll();
-		this.score().red(0);
-		this.score().blue(0);
+		this.score().r(0);
+		this.score().b(0);
 	}.bind(this);
 };
 
@@ -362,7 +367,7 @@ var createGroupSocket = function(url) {
 	});
 };
 
-var createSocket = function(url) {
+var createSocket = function(url, reconnect) {
 	console.log("Creating socket to " + url + ".");
 
 	if (socket) {
@@ -371,17 +376,21 @@ var createSocket = function(url) {
 
 	var socketUrl = url + (url.indexOf("?") === -1 ? "?" : "&") + "r=" + Math.round(Math.random() * 1e7);
 
-	socket = io.connect(socketUrl, { reconnect: false });
+	socketParams = { reconnect: false };
+	if (reconnect)
+		socketParams['force new connection'] = true;
+
+	socket = io.connect(socketUrl, socketParams);
 
 	socket.on('groupId', function(groupId) {
 		if (!groupId) {
 			if (url.indexOf("spectator=true") !== -1)
 				return;
 
-			console.log('Reconnecting as spectator.');
+			console.log('Reconnecting to public game as a spectator.');
 			game.reset();
 
-			createSocket(url + (url.indexOf("?") === -1 ? "?" : "&") + "spectator=true");
+			createSocket(url + (url.indexOf("?") === -1 ? "?" : "&") + "spectator=true", true);
 		}
 	});
 

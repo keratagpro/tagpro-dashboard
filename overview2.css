@@ -35,10 +35,49 @@ body {
   padding: 6px;
 }
 
-.overview-table .score {
+.players-table .score {
   font-size: 300%;
   text-align: center;
 }
+.players-table .red, .players-table .blue {
+  width: 50%;
+}
+.players-table .team {
+  margin-left: 25px;
+  margin-right: 25px;
+}
+.players-table .team.red:after {
+  padding-left: 5px;
+  padding-right: 5px;
+  content: "vs";
+  margin-right: -15px;
+}
+.players-table .red {
+  text-align: right;
+}
+.players-table .player {
+  font-size: 16px;
+  line-height: 22px;
+}
+.players-table .player .dead {
+  color: red !important;
+}
+.players-table .player .auth {
+  color: #bfff00;
+}
+.players-table .player .degree {
+  width: 20px;
+}
+.players-table .player.red .icons {
+  float: left;
+}
+.players-table .player.blue .icons {
+  float: right;
+}
+.players-table .player .icons {
+  white-space: nowrap;
+}
+
 .overview-table .title {
   width: 10%;
   white-space: nowrap;
@@ -48,28 +87,6 @@ body {
 }
 .overview-table .red {
   text-align: right;
-}
-.overview-table .player {
-  font-size: 16px;
-  line-height: 22px;
-}
-.overview-table .player .dead {
-  color: red !important;
-}
-.overview-table .player .auth {
-  color: #bfff00;
-}
-.overview-table .player .degree {
-  width: 20px;
-}
-.overview-table .player.red .icons {
-  float: left;
-}
-.overview-table .player.blue .icons {
-  float: right;
-}
-.overview-table .player .icons {
-  white-space: nowrap;
 }
 
 .sprite-tiles {
