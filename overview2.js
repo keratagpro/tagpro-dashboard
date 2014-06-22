@@ -173,9 +173,14 @@ var Game = function() {
 	}, this);
 
 	this.currentUrl = function() {
-		return "?host=" + this.host() + "&stats=" + this.selectedStatsString();
+		var parts = ["stats=" + this.selectedStatsString()];
+		
+		if (this.host())
+			parts.push("host=" + this.host());
+
+		return "?" + parts.join("&");
 	}.bind(this);
-	
+
 	this.selectedStatsString.subscribe(updateUrl);
 
 	this.getStatLabel = function(stat) {
