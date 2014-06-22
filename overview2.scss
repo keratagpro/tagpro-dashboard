@@ -1,17 +1,14 @@
-.footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	text-align: right;
-
-	.text-muted {
-		color: #333;
-	}
-}
-
 .page-overview {
 	background-color: black;
 	color: white;
+
+	.modal {
+		color: black;
+
+		.bookmarklet-link {
+			float: left;
+		}
+	}
 }
 
 .overview-table {

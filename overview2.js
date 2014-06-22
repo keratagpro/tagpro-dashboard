@@ -109,6 +109,13 @@ var Game = function() {
 			"?host='+encodeURIComponent(location.host+location.search),'_blank','width=500,height=500,location=no,menubar=no,titlebar=no'));";
 	});
 
+	this.launchPopup = function() {
+		window.open('?host=' + encodeURIComponent(this.host()), '_blank','width=500,height=500,location=no,menubar=no,titlebar=no');
+		return true;
+	}.bind(this);
+
+	this.host = ko.observable();
+
 	this.getTimeFromSeconds = function(sec) {
 		var hours = parseInt(sec / 3600, 10) % 24;
 		var minutes = parseInt(sec / 60, 10) % 60;
@@ -224,6 +231,11 @@ $(function() {
 	ko.applyBindings(game);
 
 	if (host) {
-		createSocket("http://" + host);
+		if (host.indexOf("http") !== 0)
+			host = "http://" + host;
+		createSocket(host);
+	}
+	else {
+		$('#startDialog').modal();
 	}
 });
