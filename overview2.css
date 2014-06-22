@@ -51,7 +51,10 @@ body {
   line-height: 22px;
 }
 .overview-table .player .dead {
-  color: red;
+  color: red !important;
+}
+.overview-table .player .auth {
+  color: #bfff00;
 }
 .overview-table .player.red .icons {
   float: left;
@@ -84,4 +87,7 @@ body {
 
 .sprite-flair {
   background-image: url("http://maptest.newcompte.fr/images/flair.png");
+  display: inline-block;
+  width: 16px;
+  height: 16px;
 }

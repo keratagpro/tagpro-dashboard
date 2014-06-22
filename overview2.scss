@@ -58,7 +58,11 @@ body {
 		line-height: 22px;
 
 		.dead {
-			color: red;
+			color: red !important;
+		}
+
+		.auth {
+			color: #bfff00;
 		}
 
 		&.red .icons {
@@ -96,4 +100,7 @@ body {
 
 .sprite-flair {
 	background-image: url('http://maptest.newcompte.fr/images/flair.png');
+	display: inline-block;
+	width: 16px;
+	height: 16px;
 }
