@@ -35,32 +35,14 @@
 			</table>
 
 			<h4>Team Statistics</h4>
-			<table class="overview-table table">
+			<table class="overview-table table" data-bind="foreach: selectedStats">
 				<tr>
-					<td class="title">Hold</td>
+					<td class="title" data-bind="text: label"></td>
 					<td class="red">
-						<span data-bind="text: holdRed"></span>
+						<span data-bind="text: $root.getStatRed($data)"></span>
 					</td>
 					<td class="blue">
-						<span data-bind="text: holdBlue"></span>
-					</td>
-				</tr>
-				<tr>
-					<td class="title">Score</td>
-					<td class="red">
-						<span data-bind="text: scoreRed"></span>
-					</td>
-					<td class="blue">
-						<span data-bind="text: scoreBlue"></span>
-					</td>
-				</tr>
-				<tr>
-					<td class="title">Powerups</td>
-					<td class="red">
-						<span data-bind="text: powerupsRed"></span>
-					</td>
-					<td class="blue">
-						<span data-bind="text: powerupsBlue"></span>
+						<span data-bind="text: $root.getStatBlue($data)"></span>
 					</td>
 				</tr>
 			</table>
@@ -91,6 +73,32 @@
 				</div>
 			</div>
 		</form>
+
+		<div class="footer">
+			<div class="container">
+				<a href="#settings" class="text-muted label label-muted" data-toggle="collapse">Settings</a>
+				<div id="settings" class="collapse in">
+					<form method="get">
+						<div class="form-group">
+							<label class="control-label">Host</label>
+							<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
+						</div>
+						<div class="form-group">
+							<label class="control-label">Selected stats</label>
+							<div data-bind="foreach: allStats">
+								<label class="checkbox-inline">
+									<input type="checkbox" data-bind="checked: selected">
+									<span data-bind="text: label"></span>
+								</label>
+							</div>
+						</div>
+
+						<input type="hidden" name="stats" data-bind="value: selectedStatsString">
+						<button type="submit" class="btn btn-default">Apply</button>
+					</form>
+				</div>
+			</div>
+		</div>
 
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>

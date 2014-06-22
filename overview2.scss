@@ -11,6 +11,19 @@
 	}
 }
 
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+#settings {
+	background-color: black;
+	max-width: 600px;
+	border: 1px solid #ccc;
+	padding: 6px;
+}
+
 .overview-table {
 	.score {
 		font-size: 300%;

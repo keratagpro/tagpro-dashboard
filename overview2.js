@@ -9,36 +9,82 @@ var tiles = {
 	blueflag: { x: 15, y: 1 },
 	grip: { x: 12, y: 4 },
 	bomb: { x: 12, y: 5 },
-	tagpro: { x: 12, y: 6 }
+	tagpro: { x: 12, y: 6 },
+	speed: { x: 12, y: 7 }
 };
 
-var powerupUpdate = {
-	update: function(options) {
-		if (options.data)
-			options.parent.powerupGrabs(options.parent.powerupGrabs() + 1);
+var updateWithCount = function(name) {
+	return {
+		update: function(options) {
+			if (options.data)
+				options.parent[name](options.parent[name]() + 1);
 
-		return options.data;
+			return options.data;
+		}
+	};
+};
+
+var powerupAttributes = ['grip', 'speed', 'bomb', 'tagpro'];
+
+var playerMapping = {};
+powerupAttributes.forEach(function(attr) {
+	playerMapping[attr] = updateWithCount(attr);
+});
+
+var summableAttributes = ['s-tags', 's-pops', 's-grabs', 's-returns', 's-captures',
+	's-drops', 's-support', 's-hold', 's-prevent', 'score', 'points', 'degree'];
+var attributes = ['id', 'name', 'team', 'flag', 'dead', 'flair', 'auth', 'draw'];
+//var ignoredAttributes = ['directSet', 'up', 'down',	'left', 'right', 'ms', 'ac', 'den', 'rx', 'ry', 'lx', 'ly', 'a', 'ra'];
+
+var attributeLabels = {
+	"powerupCount": { label: "Powerups" }
+};
+
+// Add labels for powerup attributes
+powerupAttributes.forEach(function(pup) {
+	attributeLabels[pup + "Count"] = {
+		label: "Powerups: " + pup.charAt(0).toUpperCase() + pup.slice(1)
+	};
+});
+
+// Add labels for summable attributes
+summableAttributes.forEach(function(attr) {
+	var val = attr;
+	if (attr.indexOf('s-') === 0) {
+		val = attr.slice(2);
 	}
-};
 
-var playerMapping = {
-	'grip': powerupUpdate,
-	'bomb': powerupUpdate,
-	'tagpro': powerupUpdate
-};
+	attributeLabels[attr] = { label: val.charAt(0).toUpperCase() + val.slice(1) };
 
-var attributes = ["id", "name", "team", "flag", "grip", "speed", "tagpro", "bomb",
-	"dead", "directSet", "s-tags", "s-pops", "s-grabs", "s-returns", "s-captures",
-	"s-drops", "s-support", "s-hold", "s-prevent", "score", "points", "up", "down",
-	"left", "right", "ms", "ac", "auth", "flair", "den", "degree", "rx", "ry",
-	"lx", "ly", "a", "ra", "draw"];
+	if (val == 'hold' || val == 'prevent')
+		attributeLabels[attr].time = true;
+});
+
+var attributeLabelsArray = [];
+for (var id in attributeLabels) {
+	var attr = attributeLabels[id];
+	attr.id = id;
+	attr.selected = false;
+	attributeLabelsArray.push(attr);
+}
 
 var Player = function(data) {
+	powerupAttributes.forEach(function(attr) {
+		this[attr] = ko.observable();
+		this[attr + "Count"] = ko.observable(0);
+	}.bind(this));
+
+	summableAttributes.forEach(function(attr) {
+		this[attr] = ko.observable(0);
+	}.bind(this));
+
 	attributes.forEach(function(attr) {
 		this[attr] = ko.observable();
 	}.bind(this));
 
-	this.powerupGrabs = ko.observable(0);
+	this.powerupCount = ko.computed(function() {
+		return this.gripCount() + this.bombCount() + this.tagproCount() + this.speedCount();
+	}, this);
 
 	ko.mapping.fromJS(data, playerMapping, this);
 
@@ -84,9 +130,15 @@ var Player = function(data) {
 	}, this);
 };
 
+var updateUrl = function() {
+	if (!history.replaceState) return;
+	history.replaceState(null, null, game.currentUrl());
+};
+
 var Game = function() {
 	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
+	this.host = ko.observable();
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -94,11 +146,70 @@ var Game = function() {
 		});
 	}.bind(this);
 
-	this.getSum = function(players, val) {
+	this.allStats = ko.mapping.fromJS(attributeLabelsArray);
+
+	this.selectedStats = ko.computed(function() {
+		return ko.utils.arrayFilter(this.allStats(), function(stat) {
+			return stat.selected();
+		});
+	}, this);
+
+	this.selectedStatIds = ko.computed({
+		read: function() {
+			return ko.utils.arrayMap(this.selectedStats(), function(stat) {
+				return stat.id();
+			});
+		},
+		write: function(ids) {
+			ko.utils.arrayForEach(this.allStats(), function(stat) {
+				stat.selected($.inArray(stat.id(), ids) !== -1);
+			});
+		},
+		owner: this
+	});
+
+	this.selectedStatsString = ko.computed(function() {
+		return this.selectedStatIds().join(',');
+	}, this);
+
+	this.currentUrl = function() {
+		return "?host=" + this.host() + "&stats=" + this.selectedStatsString();
+	}.bind(this);
+	
+	this.selectedStatsString.subscribe(updateUrl);
+
+	this.getStatLabel = function(stat) {
+		if (!attributeLabels[stat])
+			return "";
+
+		return attributeLabels[stat].label;
+	}.bind(this);
+
+	this.getStat = function(players, stat) {
+		if (!stat)
+			return 0;
+
+		var sum = this.getSum(players, stat);
+
+		if (stat.time && stat.time())
+			return this.getTimeFromSeconds(sum);
+		else
+			return sum;
+	}.bind(this);
+
+	this.getStatRed = function(stat) {
+		return this.getStat(this.playersRed(), stat);
+	}.bind(this);
+
+	this.getStatBlue = function(stat) {
+		return this.getStat(this.playersBlue(), stat);
+	}.bind(this);
+
+	this.getSum = function(players, stat) {
 		var score = 0;
 
 		ko.utils.arrayForEach(players, function(player) {
-			score += ko.utils.unwrapObservable(player[val]);
+			score += ko.utils.unwrapObservable(player[stat.id()]);
 		});
 
 		return score;
@@ -140,32 +251,6 @@ var Game = function() {
 		return ko.utils.arrayFilter(this.players(), function(player) {
 			return player.team && player.team() == 2;
 		});
-	}, this);
-
-	this.scoreRed = ko.computed(function() {
-		return this.getSum(this.playersRed(), "score");
-	}, this);
-
-	this.scoreBlue = ko.computed(function() {
-		return this.getSum(this.playersBlue(), "score");
-	}, this);
-
-	this.holdRed = ko.computed(function() {
-		var seconds = this.getSum(this.playersRed(), "s-hold");
-		return this.getTimeFromSeconds(seconds);
-	}, this);
-
-	this.holdBlue = ko.computed(function() {
-		var seconds = this.getSum(this.playersBlue(), "s-hold");
-		return this.getTimeFromSeconds(seconds);
-	}, this);
-
-	this.powerupsRed = ko.computed(function() {
-		return this.getSum(this.playersRed(), "powerupGrabs");
-	}, this);
-
-	this.powerupsBlue = ko.computed(function() {
-		return this.getSum(this.playersBlue(), "powerupGrabs");
 	}, this);
 };
 
@@ -226,8 +311,14 @@ var requestSocketUrl = function() {
 $(function() {
 	var url = $.url();
 	var host = url.param('host');
+	var stats = url.param('stats') || 's-hold,score,powerupCount';
 
 	game = new Game();
+	game.host(host);
+
+	if (stats)
+		game.selectedStatIds(stats.split(','));
+
 	ko.applyBindings(game);
 
 	if (host) {
@@ -236,6 +327,13 @@ $(function() {
 		createSocket(host);
 	}
 	else {
+		game.score().r(2);
+		game.score().b(1);
+		game.players.push(new Player({ id: 1, team: 1, name: "Some Ball 1", flag: 2, grip: true, tagpro: true, "s-hold": 100, score: 40, gripCount: 2 }));
+		game.players.push(new Player({ id: 2, team: 2, name: "Some Ball 2", flag: 1, grip: true, bomb: true, "s-hold": 25, score: 20, tagproCount: 2 }));
+		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true }));
+		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4" }));
+
 		$('#startDialog').modal();
 	}
 });
