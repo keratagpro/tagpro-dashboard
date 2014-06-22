@@ -105,7 +105,7 @@ var Game = function() {
 	};
 
 	this.bookmarkletLink = ko.computed(function() {
-		return "javascript:void(window.open('" + location.href +
+		return "javascript:void(window.open('" + location.origin + location.pathname +
 			"?host='+encodeURIComponent(location.host),'_blank','width=500,height=500,location=no,menubar=no,titlebar=no'));";
 	});
 
