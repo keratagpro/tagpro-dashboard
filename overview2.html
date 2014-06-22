@@ -23,6 +23,10 @@
 							</span>
 						</td>
 					</tr>
+					<tr data-bind="visible: teamNameRed() || teamNameBlue()">
+						<td class="team red" data-bind="text: teamNameRed"></td>
+						<td class="team blue" data-bind="text: teamNameBlue"></td>
+					</tr>
 				</thead>
 				<tr>
 					<td class="player red" data-bind="template: { name: 'player-template', foreach: playersRed }">
@@ -58,7 +62,7 @@
 						</div>
 						<div class="modal-body">
 							<div class="form-group">
-								<label for="host">Copy the link of the game you are spectating here:</label>
+								<label for="host">Copy the game or group link here:</label>
 								<input type="text" class="form-control" id="host" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
 							</div>
 
@@ -93,13 +97,21 @@
 										</label>
 									</div>
 								</div>
+								<div class="form-group">
+									<label for="teamNameRed" class="control-label">Red team name</label>
+									<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed">
+								</div>
+								<div class="form-group">
+									<label for="teamNameBlue" class="control-label">Blue team name</label>
+									<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue">
+								</div>
 
 								<input type="hidden" name="stats" data-bind="value: selectedStatsString">
 								<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
 							</div>
 						</div>
 						<div class="modal-footer">
-							<p><span class="text-success">ProTip</span>: You can open this scoreboard directly from the game you are spectating. Drag this bookmarklet into your bookmarks bar and click on it when viewing a game: [<a data-bind="attr: { href: bookmarkletLink }" href="#">TagPro Scoreboard</a>]</p>
+							<p><span class="text-success">ProTip</span>: You can open this scoreboard directly from the game or group you are spectating. Drag this bookmarklet into your bookmarks bar and click on it when in a game/group: [<a data-bind="attr: { href: bookmarkletLink }" href="#">TagPro Scoreboard</a>]</p>
 							<p><span class="text-success">ProTip #2</span>: The scoreboard also works on public games. <em>In that case, make sure you have <span style="white-space: nowrap">?spectator=true</span> in the URL, otherwise the TagPro server will try to redirect you to a new game.</em></p>
 						</div>
 					</div>
@@ -137,6 +149,15 @@
 						<div class="form-group">
 							<label class="control-label">Host</label>
 							<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
+						</div>
+
+						<div class="form-group">
+							<label for="teamNameRed" class="control-label">Red team name</label>
+							<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed">
+						</div>
+						<div class="form-group">
+							<label for="teamNameBlue" class="control-label">Blue team name</label>
+							<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue">
 						</div>
 
 						<input type="hidden" name="stats" data-bind="value: selectedStatsString">

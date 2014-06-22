@@ -90,7 +90,7 @@ var Player = function(data) {
 
 	this.getSprite = function(sprite) {
 		var tile = tiles[sprite];
-		var position = (-tile.x * 40) + "px " + (-tile.y * 40) + "px";
+		var position = (-tile.x * 20) + "px " + (-tile.y * 20) + "px";
 		return { backgroundPosition: position };
 	};
 
@@ -134,7 +134,10 @@ var Game = function(data) {
 	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
 	this.host = ko.observable(data.host);
+	this.socketPort = ko.observable(data.socketPort);
 	this.endTime = ko.observable();
+	this.teamNameRed = ko.observable(data.teamRed);
+	this.teamNameBlue = ko.observable(data.teamBlue);
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -152,6 +155,15 @@ var Game = function(data) {
 		
 		if (this.host())
 			parts.push("host=" + this.host());
+
+		if (this.socketPort())
+			parts.push("socketPort=" + this.socketPort());
+
+		if (this.teamNameRed())
+			parts.push("teamRed=" + this.teamNameRed());
+
+		if (this.teamNameBlue())
+			parts.push("teamBlue=" + this.teamNameBlue());
 
 		return "?" + parts.join("&");
 	}, this, { deferEvaluation: true });
@@ -248,7 +260,7 @@ var Game = function(data) {
 
 	this.bookmarkletLink = ko.computed(function() {
 		return "javascript:void(window.open('" + location.origin + location.pathname +
-			"?host='+encodeURIComponent(location.host+location.search),'_blank','width=500,height=500,location=no,menubar=no,titlebar=no'));";
+			"?host='+encodeURIComponent(location.href)+'&socketPort='+tagpro.socketPort,'_blank','width=500,height=500,location=no,menubar=no,titlebar=no'));";
 	});
 
 	this.launchPopup = function() {
@@ -306,6 +318,42 @@ var Game = function(data) {
 		if (!history.replaceState) return;
 		history.replaceState(null, null, this.currentUrl());
 	}.bind(this));
+};
+
+var createGroupSocket = function(url) {
+	console.log("Creating socket to " + url + ".");
+
+	if (socket) {
+		socket.disconnect();
+	}
+
+	socket = io.connect(url + "?r=" + Math.round(Math.random() * 1e7), { reconnect: false });
+
+	var playerId;
+	var isSpectating = false;
+
+	socket.on('you', function(id) {
+		playerId = id;
+
+		socket.emit('team', {
+			id: id,
+			team: 3
+		});
+
+		isSpectating = true;
+	});
+
+	socket.on('port', function(port) {
+		if (!port)
+			return;
+
+		if (playerId) {
+			var url = $.url(game.host()).data.attr;
+			console.log(url);
+			game.host(url.protocol + "://" + url.host + ":" + port);
+			location.reload();
+		}
+	});
 };
 
 var createSocket = function(url) {
@@ -370,12 +418,24 @@ $(function() {
 	var url = $.url();
 	var host = url.param('host');
 
+	if (host && host.indexOf("http") !== 0) {
+		host = "http://" + host;
+	}
+
 	game = new Game(url.data.param.query);
 	ko.applyBindings(game);
 
-	if (host) {
-		if (host.indexOf("http") !== 0)
-			host = "http://" + host;
+	if (host && host.indexOf("/groups/") !== -1) {
+		var socketPort = url.param('socketPort');
+
+		if (socketPort) {
+			var attr = $.url(host).data.attr;
+			host = attr.protocol + "://" + attr.host + ":" + socketPort + attr.relative;
+		}
+
+		createGroupSocket(host);
+	}
+	else if (host) {
 		createSocket(host);
 	}
 	else {
