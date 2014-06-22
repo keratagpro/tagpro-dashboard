@@ -234,8 +234,6 @@ var Game = function(data) {
 		return true;
 	}.bind(this);
 
-	this.host = ko.observable();
-
 	this.getTimeFromSeconds = function(sec) {
 		var hours = parseInt(sec / 3600, 10) % 24;
 		var minutes = parseInt(sec / 60, 10) % 60;
