@@ -135,10 +135,10 @@ var updateUrl = function() {
 	history.replaceState(null, null, game.currentUrl());
 };
 
-var Game = function() {
+var Game = function(data) {
 	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
-	this.host = ko.observable();
+	this.host = ko.observable(data.host);
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -167,6 +167,10 @@ var Game = function() {
 		},
 		owner: this
 	});
+
+	if (data.stats) {
+		this.selectedStatIds(data.stats);
+	}
 
 	this.selectedStatsString = ko.computed(function() {
 		return this.selectedStatIds().join(',');
@@ -318,12 +322,7 @@ $(function() {
 	var host = url.param('host');
 	var stats = url.param('stats') || 's-hold,score,powerupCount';
 
-	game = new Game();
-	game.host(host);
-
-	if (stats)
-		game.selectedStatIds(stats.split(','));
-
+	game = new Game({ host: host, stats: stats ? stats.split(',') : null });
 	ko.applyBindings(game);
 
 	if (host) {
