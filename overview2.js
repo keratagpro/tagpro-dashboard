@@ -17,7 +17,7 @@ var updateWithCount = function(name) {
 	return {
 		update: function(options) {
 			if (options.data)
-				options.parent[name](options.parent[name]() + 1);
+				options.parent[name + "Count"](options.parent[name + "Count"]() + 1);
 
 			return options.data;
 		}
