@@ -139,6 +139,7 @@ var Game = function(data) {
 	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
 	this.host = ko.observable(data.host);
+	this.endTime = ko.observable();
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -146,13 +147,29 @@ var Game = function(data) {
 		});
 	}.bind(this);
 
-	this.allStats = ko.mapping.fromJS(attributeLabelsArray);
+	this.selectedStats = ko.observableArray();
 
-	this.selectedStats = ko.computed(function() {
-		return ko.utils.arrayFilter(this.allStats(), function(stat) {
-			return stat.selected();
-		});
-	}, this);
+	this.allStats = ko.mapping.fromJS(attributeLabelsArray, {
+		create: function(options) {
+			var parent = this;
+			var stat = ko.mapping.fromJS(options.data);
+			
+			stat.selected = ko.computed({
+				read: function() {
+					return parent.selectedStats.indexOf(stat) !== -1;
+				},
+				write: function(value) {
+					if (value)
+						parent.selectedStats.push(stat);
+					else
+						parent.selectedStats.remove(stat);
+				},
+				owner: stat
+			});
+
+			return stat;
+		}.bind(this)
+	});
 
 	this.selectedStatIds = ko.computed({
 		read: function() {
@@ -161,9 +178,18 @@ var Game = function(data) {
 			});
 		},
 		write: function(ids) {
-			ko.utils.arrayForEach(this.allStats(), function(stat) {
-				stat.selected($.inArray(stat.id(), ids) !== -1);
-			});
+			this.selectedStats.removeAll();
+
+			ids.forEach(function(id) {
+				var stat = ko.utils.arrayFirst(this.allStats(), function(stat) {
+					return stat.id() == id;
+				});
+
+				if (!stat)
+					return;
+				
+				this.selectedStats.push(stat);
+			}.bind(this));
 		},
 		owner: this
 	});
@@ -272,6 +298,10 @@ var createSocket = function(url) {
 
 	socket.on('score', function(score) {
 		ko.mapping.fromJS({ score: score }, { }, game);
+	});
+
+	socket.on('time', function(time) {
+		game.endTime(new Date(new Date().getTime + time.time));
 	});
 
 	socket.on('p', function(p) {
