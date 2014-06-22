@@ -14,6 +14,9 @@ body {
 .page-overview .modal {
   color: black;
 }
+.page-overview .modal .modal-footer {
+  text-align: left;
+}
 .page-overview .modal .bookmarklet-link {
   float: left;
 }
@@ -56,6 +59,9 @@ body {
 .overview-table .player .auth {
   color: #bfff00;
 }
+.overview-table .player .degree {
+  width: 20px;
+}
 .overview-table .player.red .icons {
   float: left;
 }
@@ -90,4 +96,8 @@ body {
   display: inline-block;
   width: 16px;
   height: 16px;
+}
+
+.flair-empty {
+  background-position: -160px -144px;
 }

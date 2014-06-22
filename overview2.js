@@ -130,11 +130,6 @@ var Player = function(data) {
 	}, this);
 };
 
-var updateUrl = function() {
-	if (!history.replaceState) return;
-	history.replaceState(null, null, game.currentUrl());
-};
-
 var Game = function(data) {
 	this.score = ko.observable({ r: ko.observable(0), b: ko.observable(0) });
 	this.players = ko.observableArray();
@@ -145,6 +140,25 @@ var Game = function(data) {
 		this.players.remove(function(player) {
 			return player.id() == id;
 		});
+	}.bind(this);
+
+	this.currentUrl = ko.computed(function() {
+		var parts = ["stats=" + this.selectedStatsString()];
+
+		var playerInfo = this.selectedPlayerInfoString();
+
+		if (playerInfo)
+			parts.push("player=" + playerInfo);
+		
+		if (this.host())
+			parts.push("host=" + this.host());
+
+		return "?" + parts.join("&");
+	}, this, { deferEvaluation: true });
+
+	this.updateUrl = function() {
+		if (!history.replaceState) return;
+		history.replaceState(null, null, this.currentUrl());
 	}.bind(this);
 
 	this.selectedStats = ko.observableArray();
@@ -194,24 +208,13 @@ var Game = function(data) {
 		owner: this
 	});
 
-	if (data.stats) {
-		this.selectedStatIds(data.stats);
-	}
+	this.selectedStatIds((data.stats || 's-hold,score,powerupCount').split(','));
 
 	this.selectedStatsString = ko.computed(function() {
 		return this.selectedStatIds().join(',');
 	}, this);
 
-	this.currentUrl = function() {
-		var parts = ["stats=" + this.selectedStatsString()];
-		
-		if (this.host())
-			parts.push("host=" + this.host());
-
-		return "?" + parts.join("&");
-	}.bind(this);
-
-	this.selectedStatsString.subscribe(updateUrl);
+	this.selectedStatsString.subscribe(this.updateUrl);
 
 	this.getStatLabel = function(stat) {
 		if (!attributeLabels[stat])
@@ -285,6 +288,29 @@ var Game = function(data) {
 			return player.team && player.team() == 2;
 		});
 	}, this);
+
+	var playerInfo = (data.player && data.player.split(',')) || ['auth', 'flair'];
+	this.showAuth = ko.observable($.inArray('auth', playerInfo) !== -1);
+	this.showFlair = ko.observable($.inArray('flair', playerInfo) !== -1);
+	this.showDegree = ko.observable($.inArray('degree', playerInfo) !== -1);
+
+	this.selectedPlayerInfoString = ko.computed(function() {
+		var parts = [];
+		if (this.showAuth())
+			parts.push("auth");
+
+		if (this.showFlair())
+			parts.push("flair");
+
+		if (this.showDegree())
+			parts.push("degree");
+
+		return parts.join(",");
+	}, this);
+
+	this.showAuth.subscribe(this.updateUrl);
+	this.showFlair.subscribe(this.updateUrl);
+	this.showDegree.subscribe(this.updateUrl);
 };
 
 var createSocket = function(url) {
@@ -348,9 +374,8 @@ var requestSocketUrl = function() {
 $(function() {
 	var url = $.url();
 	var host = url.param('host');
-	var stats = url.param('stats') || 's-hold,score,powerupCount';
 
-	game = new Game({ host: host, stats: stats ? stats.split(',') : null });
+	game = new Game(url.data.param.query);
 	ko.applyBindings(game);
 
 	if (host) {
@@ -363,8 +388,8 @@ $(function() {
 		game.score().b(1);
 		game.players.push(new Player({ id: 1, team: 1, name: "Some Ball 1", flag: 2, grip: true, tagpro: true, "s-hold": 100, score: 40, gripCount: 2 }));
 		game.players.push(new Player({ id: 2, team: 2, name: "Some Ball 2", flag: 1, grip: true, bomb: true, "s-hold": 25, score: 20, tagproCount: 2 }));
-		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true }));
-		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4" }));
+		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true, degree: 70 }));
+		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4", auth: true, flair: { x: 0, y: 5 }}));
 
 		$('#startDialog').modal();
 	}
