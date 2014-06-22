@@ -302,6 +302,7 @@ var Game = function(data) {
 	}, this);
 
 	this.currentUrl.subscribe(function() {
+		if (!this.host()) return;
 		if (!history.replaceState) return;
 		history.replaceState(null, null, this.currentUrl());
 	}.bind(this));

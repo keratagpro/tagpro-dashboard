@@ -62,11 +62,41 @@
 								<input type="text" class="form-control" id="host" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
 							</div>
 
+							<a href="#modal-settings" class="btn btn-link" style="float: left" data-toggle="collapse">Change Settings...</a>
+
 							<p class="text-right">
 								<button type="submit" class="btn btn-default">Launch here</button>
 								<button type="button" class="btn btn-primary" data-bind="click: launchPopup">Launch Popup</button>
 							</p>
 
+							<div id="modal-settings" class="collapse">
+								<div class="form-group">
+									<label class="control-label">Team Stats</label>
+									<div data-bind="foreach: allStats">
+										<label class="checkbox-inline">
+											<input type="checkbox" data-bind="checked: selected">
+											<span data-bind="text: label"></span>
+										</label>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="control-label">Player Info</label>
+									<div>
+										<label class="checkbox-inline">
+											<input type="checkbox" data-bind="checked: showFlair"> Flair
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" data-bind="checked: showAuth"> Authentication
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" data-bind="checked: showDegree"> Degree
+										</label>
+									</div>
+								</div>
+
+								<input type="hidden" name="stats" data-bind="value: selectedStatsString">
+								<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
+							</div>
 						</div>
 						<div class="modal-footer">
 							<p><span class="text-success">ProTip</span>: You can open this scoreboard directly from the game you are spectating. Drag this bookmarklet into your bookmarks bar and click on it when viewing a game: [<a data-bind="attr: { href: bookmarkletLink }" href="#">TagPro Scoreboard</a>]</p>
