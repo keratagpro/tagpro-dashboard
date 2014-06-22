@@ -176,9 +176,11 @@ var createSocket = function(url) {
 	});
 
 	socket.on('p', function(p) {
-		if (!$.isArray(p)) {
+		if (!$.isArray(p))
+			p = p.u;
+
+		if (!$.isArray(p))
 			return;
-		}
 
 		if (!p[0].id)
 			return;
