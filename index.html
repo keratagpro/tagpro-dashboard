@@ -20,14 +20,16 @@
 						<div class="modal-body">
 							<div class="form-group">
 								<label for="host">Copy the game or group link here:</label>
-								<input type="text" class="form-control" id="host" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
+								<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com/groups/abcdefgh">
 							</div>
 
-							<a href="#modal-settings" class="btn btn-link" style="float: left" data-toggle="collapse">Change Settings...</a>
-
 							<p class="text-right">
-								<button type="submit" class="btn btn-default">Launch here</button>
+								<button type="submit" class="btn btn-primary">Launch</button>
 							</p>
+						</div>
+						<div class="modal-footer">
+							<p><span class="text-success">ProTip</span>: You can open this dashboard directly from the game or group you are spectating. Drag this bookmarklet into your bookmarks bar and click on it when in a game/group: [<a data-bind="attr: { href: bookmarkletLink }" href="#">TagPro Dashboard</a>]</p>
+							<p><span class="text-success">ProTip #2</span>: The dashboard also works on public games. <em>In that case, make sure you have <span style="white-space: nowrap">?spectator=true</span> in the URL, otherwise the TagPro server will try to redirect you to a new game.</em></p>
 						</div>
 					</div>
 				</div>
@@ -45,7 +47,7 @@
 			</div>
 			<div class="screen screen-overview resizable draggable" data-name="overview">
 				<div data-bind="visible: resizeMode" class="resize-handle"></div>
-				<iframe src="overview2.html" frameborder="0"></iframe>
+				<iframe src="" frameborder="0"></iframe>
 			</div>
 		</div>
 

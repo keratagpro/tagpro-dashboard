@@ -68,6 +68,8 @@ var Position = function(data) {
 var Model = function(data) {
 	var self = this;
 
+	this.host = ko.observable(data.host);
+
 	this.positionMain = ko.observable(new Position((data.posMain || '').split(',')));
 	this.positionSecond = ko.observable(new Position((data.posSecond || '').split(',')));
 	this.positionOverview = ko.observable(new Position((data.posOverview || '').split(',')));
@@ -80,6 +82,11 @@ var Model = function(data) {
 
 		return parts.join('&');
 	}, this);
+
+	this.bookmarkletLink = ko.computed(function() {
+		return "javascript:void(window.open('" + location.origin + location.pathname +
+			"?host='+encodeURIComponent(location.href)+'&socketPort='+tagpro.socketPort,'_self'));";
+	});
 
 	this.setSize = function(name, size) {
 		attr = "position" + name.charAt(0).toUpperCase() + name.slice(1);
@@ -116,6 +123,7 @@ var Model = function(data) {
 				$('.draggable').draggable({
 					snap: true,
 					containment: 'window',
+					stack: '.screen',
 					stop: function(ev, ui) {
 						self.setPosition($(this).data('name'), ui.position);
 					}
@@ -157,12 +165,11 @@ var defaultLayout = function() {
 
 $(function() {
 	pageUrl = $.url();
-	var group = pageUrl.param('group');
 	var host = pageUrl.param('host');
-	var port = pageUrl.param('port');
-	var layout = pageUrl.param('layout');
 
-	$('#layoutButton').on('click', saveLayout);
+	if (host && host.indexOf("http") !== 0) {
+		host = "http://" + host;
+	}
 
 	model = new Model(pageUrl.data.param.query);
 	ko.applyBindings(model);
@@ -184,30 +191,28 @@ $(function() {
 		resizeTimer = setTimeout(defaultLayout, 100);
 	});
 
-	$(document).keydown(function(e) {
-		if (e.which == 17) {
-			$('body').addClass('resize-mode');
+	if (host) {
+		var socketPort = pageUrl.param('socketPort');
+		var overviewUrl = "overview2.html?" + pageUrl.data.attr.query;
+
+		if (!socketPort) {
+			if (host.indexOf("koalabeast.com") !== -1)
+				socketPort = 443;
+			else if (host.indexOf("newcompte.fr") !== -1)
+				socketPort = 81;
+			else if (host.indexOf("justletme.be") !== -1)
+				socketPort = 8081;
+			else
+				socketPort = 443;
+
+			overviewUrl += "&socketPort=" + socketPort;
 		}
-	}).keyup(function(e) {
-		if (e.which == 17) {
-			$('body').removeClass('resize-mode');
-		}
-	});
 
-	$(window).blur(function(e) {
-		$('body').removeClass('resize-mode');
-		$(document).trigger('mouseup');
-	});
-
-	$('#host').val(host);
-	$('#port').val(port);
-	$('#group').val(group);
-	$('#layout').val(layout);
-
-	if (group) {
-		$('iframe.game').attr('src', "http://" + host + "/groups/" + group);
+		$('.screen-main iframe, .screen-second iframe').attr('src', host);
+		$('.screen-overview iframe').attr('src', overviewUrl);
 	}
-	else if (port) {
-		$('iframe.game').attr('src', "http://" + host + ":" + port);
+	else {
+		$('.screen-overview iframe').attr('src', 'overview2.html');
+		$('#startDialog').modal();
 	}
 });
