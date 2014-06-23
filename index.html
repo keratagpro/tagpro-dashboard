@@ -5,82 +5,73 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<link href="//code.jquery.com/ui/1.10.4/themes/ui-darkness/jquery-ui.css" rel="stylesheet" media="screen">
 		<link href="styles.css" rel="stylesheet" media="screen">
 	</head>
 	<body>
-		<div class="settings">
-			<a class="settings-button" href="#settings" data-toggle="collapse">Settings</a>
+		<form method="get">
+			<div class="modal fade" id="startDialog">
+				<div class="modal-dialog">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">TagPro Spectator Dashboard</h4>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="host">Copy the game or group link here:</label>
+								<input type="text" class="form-control" id="host" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
+							</div>
 
-			<div id="settings" class="collapse settings-panel">
-				<form class="form-horizontal">
-					<div class="form-group">
-						<label class="col-sm-4 control-label" for="host">Host</label>
-						<div class="col-sm-8">
-							<input class="form-control" name="host" id="host" type="text" value="" placeholder="tagpro-orbit.koalabeast.com">
+							<a href="#modal-settings" class="btn btn-link" style="float: left" data-toggle="collapse">Change Settings...</a>
+
+							<p class="text-right">
+								<button type="submit" class="btn btn-default">Launch here</button>
+							</p>
 						</div>
 					</div>
-					<div class="form-group">
-						<label class="col-sm-4 control-label" for="port">Port</label>
-						<div class="col-sm-8">
-							<input class="form-control" name="port" id="port" type="text" value="" placeholder="80">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="col-sm-4 control-label" for="group">Group</label>
-						<div class="col-sm-8">
-							<input class="form-control" name="group" id="group" type="text" value="" placeholder="abcdefgh">
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-12">
-							<input type="submit" class="btn btn-default" value="Apply">
-						</div>
-					</div>
-				</form>
+				</div>
 			</div>
-		</div>
+		</form>
 
 		<div class="screens">
-			<div class="screen screen-main">
-				<div class="wrapper">
-					<div class="handle drag-handle">
-						<span class="glyphicon glyphicon-move"></span>						
-					</div>
-					<div class="handle resize-handle">
-						<span class="glyphicon glyphicon-resize-full"></span>
-					</div>
-					<iframe id="main" class="game"></iframe>
-				</div>
+			<div class="screen screen-main resizable draggable" data-name="main">
+				<div data-bind="visible: resizeMode" class="resize-handle"></div>
+				<iframe src="" frameborder="0"></iframe>
 			</div>
-			<div class="secondary">
-				<div class="screen screen-second">
-					<div class="wrapper">
-						<div class="handle drag-handle">
-							<span class="glyphicon glyphicon-move"></span>						
-						</div>
-						<div class="handle resize-handle">
-							<span class="glyphicon glyphicon-resize-full"></span>
-						</div>
-						<iframe id="second" class="game"></iframe>
-					</div>
-				</div>
-				<div class="screen screen-overview">
-					<div class="wrapper">
-						<div class="handle drag-handle">
-							<span class="glyphicon glyphicon-move"></span>						
-						</div>
-						<div class="handle resize-handle">
-							<span class="glyphicon glyphicon-resize-full"></span>
-						</div>
-						<iframe id="overview" class="overview" src="overview.html"></iframe>
-					</div>
-				</div>
+			<div class="screen screen-second resizable draggable" data-name="second">
+				<div data-bind="visible: resizeMode" class="resize-handle"></div>
+				<iframe src="" frameborder="0"></iframe>
+			</div>
+			<div class="screen screen-overview resizable draggable" data-name="overview">
+				<div data-bind="visible: resizeMode" class="resize-handle"></div>
+				<iframe src="overview2.html" frameborder="0"></iframe>
 			</div>
 		</div>
 
-		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<div class="footer">
+			<div id="settings" class="settings collapse">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<form>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" data-bind="checked: resizeMode"> Move/Resize windows
+								</label>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<a href="#settings" class="settings-button text-muted btn btn-link" data-toggle="collapse">Settings</a>
+		</div>
+
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-		<script src="jqDnR.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
+		<script src="jquery.ui.resizable.snap.min.js"></script>
+		<script src="knockout.mapping-latest.js"></script>
 		<script src="purl.js"></script>
 
 		<script src="index.js"></script>
