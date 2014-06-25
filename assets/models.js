@@ -1,84 +1,178 @@
-var socket;
-var game;
+var scoreboard = (function() {
+	var tiles = {
+		redball: { x: 14, y: 0 },
+		blueball: { x: 15, y: 0},
+		yellowflag: { x: 13, y: 1 },
+		redflag: { x: 14, y: 1 },
+		blueflag: { x: 15, y: 1 },
+		grip: { x: 12, y: 4 },
+		bomb: { x: 12, y: 5 },
+		tagpro: { x: 12, y: 6 },
+		speed: { x: 12, y: 7 }
+	};
 
-var tiles = {
-	redball: { x: 14, y: 0 },
-	blueball: { x: 15, y: 0},
-	yellowflag: { x: 13, y: 1 },
-	redflag: { x: 14, y: 1 },
-	blueflag: { x: 15, y: 1 },
-	grip: { x: 12, y: 4 },
-	bomb: { x: 12, y: 5 },
-	tagpro: { x: 12, y: 6 },
-	speed: { x: 12, y: 7 }
-};
+	var updateWithCount = function(name) {
+		return {
+			update: function(options) {
+				if (options.data)
+					options.parent[name + "Count"](options.parent[name + "Count"]() + 1);
 
-var updateWithCount = function(name) {
-	return {
-		update: function(options) {
-			if (options.data)
-				options.parent[name + "Count"](options.parent[name + "Count"]() + 1);
+				return options.data;
+			}
+		};
+	};
 
-			return options.data;
+	var powerupAttributes = ['grip', 'speed', 'bomb', 'tagpro'];
+
+	var playerMapping = {};
+	powerupAttributes.forEach(function(attr) {
+		playerMapping[attr] = updateWithCount(attr);
+	});
+
+	var summableAttributes = ['s-tags', 's-pops', 's-grabs', 's-returns', 's-captures',
+		's-drops', 's-support', 's-hold', 's-prevent', 'score', 'points', 'degree'];
+	var attributes = ['id', 'name', 'team', 'flag', 'dead', 'flair', 'auth', 'draw'];
+	//var ignoredAttributes = ['directSet', 'up', 'down', 'left', 'right', 'ms', 'ac', 'den', 'rx', 'ry', 'lx', 'ly', 'a', 'ra'];
+
+	var attributeLabels = {
+		"powerupCount": { label: "Powerups" }
+	};
+
+	// Add labels for powerup attributes
+	powerupAttributes.forEach(function(pup) {
+		attributeLabels[pup + "Count"] = {
+			label: "Powerups: " + pup.charAt(0).toUpperCase() + pup.slice(1)
+		};
+	});
+
+	// Add labels for summable attributes
+	summableAttributes.forEach(function(attr) {
+		var val = attr;
+		if (attr.indexOf('s-') === 0) {
+			val = attr.slice(2);
 		}
-	};
-};
 
-var powerupAttributes = ['grip', 'speed', 'bomb', 'tagpro'];
+		attributeLabels[attr] = { label: val.charAt(0).toUpperCase() + val.slice(1) };
 
-var playerMapping = {};
-powerupAttributes.forEach(function(attr) {
-	playerMapping[attr] = updateWithCount(attr);
-});
+		if (val == 'hold' || val == 'prevent')
+			attributeLabels[attr].time = true;
+	});
 
-var summableAttributes = ['s-tags', 's-pops', 's-grabs', 's-returns', 's-captures',
-	's-drops', 's-support', 's-hold', 's-prevent', 'score', 'points', 'degree'];
-var attributes = ['id', 'name', 'team', 'flag', 'dead', 'flair', 'auth', 'draw'];
-//var ignoredAttributes = ['directSet', 'up', 'down',	'left', 'right', 'ms', 'ac', 'den', 'rx', 'ry', 'lx', 'ly', 'a', 'ra'];
-
-var attributeLabels = {
-	"powerupCount": { label: "Powerups" }
-};
-
-// Add labels for powerup attributes
-powerupAttributes.forEach(function(pup) {
-	attributeLabels[pup + "Count"] = {
-		label: "Powerups: " + pup.charAt(0).toUpperCase() + pup.slice(1)
-	};
-});
-
-// Add labels for summable attributes
-summableAttributes.forEach(function(attr) {
-	var val = attr;
-	if (attr.indexOf('s-') === 0) {
-		val = attr.slice(2);
+	var attributeLabelsArray = [];
+	for (var id in attributeLabels) {
+		var attr = attributeLabels[id];
+		attr.id = id;
+		attr.selected = false;
+		attributeLabelsArray.push(attr);
 	}
 
-	attributeLabels[attr] = { label: val.charAt(0).toUpperCase() + val.slice(1) };
+	return {
+		tiles: tiles,
+		powerupAttributes: powerupAttributes,
+		summableAttributes: summableAttributes,
+		attributes: attributes,
+		attributeLabelsArray: attributeLabelsArray
+	};
+})();
 
-	if (val == 'hold' || val == 'prevent')
-		attributeLabels[attr].time = true;
-});
+var Position = function(data) {
+	this.left = ko.observable(data.left);
+	this.top = ko.observable(data.top);
+	this.width = ko.observable(data.width);
+	this.height = ko.observable(data.height);
 
-var attributeLabelsArray = [];
-for (var id in attributeLabels) {
-	var attr = attributeLabels[id];
-	attr.id = id;
-	attr.selected = false;
-	attributeLabelsArray.push(attr);
-}
+	this.getString = ko.computed(function() {
+		parts = [this.left(), this.top(), this.width(), this.height()];
+		return parts.join(',');
+	}, this);
+};
+
+var Dashboard = function(data) {
+	var self = this;
+
+	this.game = new Game(data);
+
+	this.host = ko.observable(data.host);
+
+	this.positionMain = ko.observable(new Position((data.posMain || '').split(',')));
+	this.positionSecond = ko.observable(new Position((data.posSecond || '').split(',')));
+	this.positionOverview = ko.observable(new Position((data.posOverview || '').split(',')));
+
+	this.currentUrl = ko.computed(function() {
+		var parts = [];
+		parts.push('posMain=' + this.positionMain().getString());
+		parts.push('posSecond=' + this.positionSecond().getString());
+		parts.push('posOverview=' + this.positionOverview().getString());
+
+		return parts.join('&');
+	}, this);
+
+	this.bookmarkletLink = ko.computed(function() {
+		return "javascript:void(window.open('" + document.location.origin + document.location.pathname +
+			"?host='+encodeURIComponent(location.href)+'&socketPort='+tagpro.socketPort,'_self'));";
+	});
+
+	this.setSize = function(name, size) {
+		attr = "position" + name.charAt(0).toUpperCase() + name.slice(1);
+		var pos = this[attr]();
+		pos.width(size.width);
+		pos.height(size.height);
+	}.bind(this);
+
+	this.setPosition = function(name, position) {
+		attr = "position" + name.charAt(0).toUpperCase() + name.slice(1);
+		var pos = this[attr]();
+		pos.left(position.left);
+		pos.top(position.top);
+	}.bind(this);
+
+	this.resizeMode = ko.observable(data.resizeMode);
+
+	this.resizeMode.subscribe(function(newValue) {
+		if (newValue) {
+			if ($('body').hasClass('custom-size')) {
+				$('.resizable').resizable("enable");
+				$('.draggable').draggable("enable");
+			}
+			else {
+				$('.resizable').resizable({
+					containment: 'document',
+					handles: 'all',
+					snap: true,
+					stop: function(ev, ui) {
+						self.setSize($(this).data('name'), ui.size);
+						self.setPosition($(this).data('name'), ui.position);
+					}
+				});
+				$('.draggable').draggable({
+					snap: true,
+					containment: 'window',
+					stack: '.screen',
+					stop: function(ev, ui) {
+						self.setPosition($(this).data('name'), ui.position);
+					}
+				});
+				$('body').addClass('custom-size');
+			}
+		}
+		else {
+			$('.resizable').resizable("disable");
+			$('.draggable').draggable("disable");
+		}
+	});
+};
 
 var Player = function(data) {
-	powerupAttributes.forEach(function(attr) {
+	scoreboard.powerupAttributes.forEach(function(attr) {
 		this[attr] = ko.observable();
 		this[attr + "Count"] = ko.observable(0);
 	}.bind(this));
 
-	summableAttributes.forEach(function(attr) {
+	scoreboard.summableAttributes.forEach(function(attr) {
 		this[attr] = ko.observable(0);
 	}.bind(this));
 
-	attributes.forEach(function(attr) {
+	scoreboard.attributes.forEach(function(attr) {
 		this[attr] = ko.observable();
 	}.bind(this));
 
@@ -86,10 +180,10 @@ var Player = function(data) {
 		return this.gripCount() + this.bombCount() + this.tagproCount() + this.speedCount();
 	}, this);
 
-	ko.mapping.fromJS(data, playerMapping, this);
+	ko.mapping.fromJS(data, scoreboard.playerMapping, this);
 
 	this.getSprite = function(sprite) {
-		var tile = tiles[sprite];
+		var tile = scoreboard.tiles[sprite];
 		var position = (-tile.x * 20) + "px " + (-tile.y * 20) + "px";
 		return { backgroundPosition: position };
 	};
@@ -138,6 +232,7 @@ var Game = function(data) {
 	this.endTime = ko.observable();
 	this.teamNameRed = ko.observable(data.teamRed);
 	this.teamNameBlue = ko.observable(data.teamBlue);
+	this.embed = ko.observable(data.embed && data.embed == "true");
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -170,7 +265,7 @@ var Game = function(data) {
 
 	this.selectedStats = ko.observableArray();
 
-	this.allStats = ko.mapping.fromJS(attributeLabelsArray, {
+	this.allStats = ko.mapping.fromJS(scoreboard.attributeLabelsArray, {
 		create: function(options) {
 			var parent = this;
 			var stat = ko.mapping.fromJS(options.data);
@@ -215,17 +310,18 @@ var Game = function(data) {
 		owner: this
 	});
 
-	this.selectedStatIds((data.stats || 's-hold,score,powerupCount').split(','));
+	var selectedStatIds = data.stats !== undefined ? data.stats : 's-hold,score,powerupCount';
+	this.selectedStatIds(selectedStatIds.split(','));
 
 	this.selectedStatsString = ko.computed(function() {
 		return this.selectedStatIds().join(',');
 	}, this);
 
 	this.getStatLabel = function(stat) {
-		if (!attributeLabels[stat])
+		if (!scoreboard.attributeLabels[stat])
 			return "";
 
-		return attributeLabels[stat].label;
+		return scoreboard.attributeLabels[stat].label;
 	}.bind(this);
 
 	this.getStat = function(players, stat) {
@@ -294,8 +390,9 @@ var Game = function(data) {
 		});
 	}, this);
 
-	var playerInfo = (data.player !== undefined && data.player.split(',')) || ['score', 'auth', 'flair'];
-	this.showScore = ko.observable($.inArray('score', playerInfo) !== -1);
+	var playerInfo = (data.player !== undefined && data.player.split(',')) || ['auth', 'flair'];
+	this.showScore = ko.observable((data.score == "true") || data.score === undefined);
+	this.showPlayers = ko.observable((data.players == "true") || data.players === undefined);
 	this.showAuth = ko.observable($.inArray('auth', playerInfo) !== -1);
 	this.showFlair = ko.observable($.inArray('flair', playerInfo) !== -1);
 	this.showDegree = ko.observable($.inArray('degree', playerInfo) !== -1);
@@ -330,151 +427,3 @@ var Game = function(data) {
 		this.score().b(0);
 	}.bind(this);
 };
-
-var createGroupSocket = function(url) {
-	console.log("Creating socket to " + url + ".");
-
-	if (socket) {
-		socket.disconnect();
-	}
-
-	socket = io.connect(url + "?r=" + Math.round(Math.random() * 1e7), { reconnect: false });
-
-	var playerId;
-	var isSpectating = false;
-
-	socket.on('you', function(id) {
-		playerId = id;
-
-		socket.emit('team', {
-			id: id,
-			team: 3
-		});
-
-		isSpectating = true;
-	});
-
-	socket.on('port', function(port) {
-		if (!port)
-			return;
-
-		if (playerId) {
-			var url = $.url(game.host()).data.attr;
-			console.log(url);
-			game.host(url.protocol + "://" + url.host + ":" + port);
-			location.reload();
-		}
-	});
-};
-
-var createSocket = function(url, reconnect) {
-	console.log("Creating socket to " + url + ".");
-
-	if (socket) {
-		socket.disconnect();
-	}
-
-	var socketUrl = url + (url.indexOf("?") === -1 ? "?" : "&") + "r=" + Math.round(Math.random() * 1e7);
-
-	socketParams = { reconnect: false };
-	if (reconnect)
-		socketParams['force new connection'] = true;
-
-	socket = io.connect(socketUrl, socketParams);
-
-	socket.on('groupId', function(groupId) {
-		if (!groupId) {
-			if (url.indexOf("spectator=true") !== -1)
-				return;
-
-			console.log('Reconnecting to public game as a spectator.');
-			game.reset();
-
-			createSocket(url + (url.indexOf("?") === -1 ? "?" : "&") + "spectator=true", true);
-		}
-	});
-
-	socket.on('score', function(score) {
-		ko.mapping.fromJS({ score: score }, { }, game);
-	});
-
-	socket.on('time', function(time) {
-		game.endTime(new Date(new Date().getTime + time.time));
-	});
-
-	socket.on('p', function(p) {
-		if (!$.isArray(p))
-			p = p.u;
-
-		if (!$.isArray(p))
-			return;
-
-		if (!p[0].id)
-			return;
-
-		p.forEach(function(playerData) {
-			var player = ko.utils.arrayFirst(game.players(), function(p1) {
-				return p1.id() == playerData.id;
-			});
-
-			if (player) {
-				ko.mapping.fromJS(playerData, playerMapping, player);
-			}
-			else {
-				game.players.push(new Player(playerData));
-			}
-		});
-	});
-
-	socket.on('playerLeft', function(id) {
-		game.removePlayer(id);
-	});
-
-	return socket;
-};
-
-var requestSocketUrl = function() {
-	if (!window.parent) {
-		return;
-	}
-
-	window.parent.postMessage({ requestSocketUrl: true }, "*");
-
-	return false;
-};
-
-$(function() {
-	var url = $.url();
-	var host = url.param('host');
-
-	if (host && host.indexOf("http") !== 0) {
-		host = "http://" + host;
-	}
-
-	game = new Game(url.data.param.query);
-	ko.applyBindings(game);
-
-	if (host && host.indexOf("/groups/") !== -1) {
-		var socketPort = url.param('socketPort');
-
-		if (socketPort) {
-			var attr = $.url(host).data.attr;
-			host = attr.protocol + "://" + attr.host + ":" + socketPort + attr.relative;
-		}
-
-		createGroupSocket(host);
-	}
-	else if (host) {
-		createSocket(host);
-	}
-	else {
-		game.score().r(2);
-		game.score().b(1);
-		game.players.push(new Player({ id: 1, team: 1, name: "Some Ball 1", flag: 2, grip: true, tagpro: true, "s-hold": 100, score: 40, gripCount: 2 }));
-		game.players.push(new Player({ id: 2, team: 2, name: "Some Ball 2", flag: 1, grip: true, bomb: true, "s-hold": 25, score: 20, tagproCount: 2 }));
-		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true, degree: 70 }));
-		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4", auth: true, flair: { x: 0, y: 5 }}));
-
-		$('#startDialog').modal();
-	}
-});

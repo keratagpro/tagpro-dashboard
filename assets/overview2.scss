@@ -67,6 +67,7 @@ body {
 	.player {
 		font-size: 16px;
 		line-height: 22px;
+		position: relative;
 
 		.dead {
 			color: red !important;
@@ -81,15 +82,27 @@ body {
 		}
 
 		&.red .icons {
-			float: left;
+			left: 0;
 		}
 
 		&.blue .icons {
-			float: right;
+			right: 0;
+
+			.flag {
+				float: right;
+			}
 		}
 
 		.icons {
+			font-size: 1px;
 			white-space: nowrap;
+			position: absolute;
+			z-index: 1;
+		}
+
+		.name {
+			position: relative;
+			z-index: 2;
 		}
 	}
 }

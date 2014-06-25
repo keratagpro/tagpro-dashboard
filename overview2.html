@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
-		<link href="overview2.css" rel="stylesheet" media="screen">
+		<link href="assets/overview2.css" rel="stylesheet" media="screen">
 	</head>
 	<body class="page-overview">
 		<div class="container">
@@ -28,7 +28,7 @@
 						<td class="team blue" data-bind="text: teamNameBlue"></td>
 					</tr>
 				</thead>
-				<tr>
+				<tr data-bind="visible: showPlayers">
 					<td class="player red" data-bind="template: { name: 'player-template', foreach: playersRed }">
 					</td>
 					<td class="player blue" data-bind="template: { name: 'player-template', foreach: playersBlue }">
@@ -73,44 +73,7 @@
 								<button type="button" class="btn btn-primary" data-bind="click: launchPopup">Launch Popup</button>
 							</p>
 
-							<div id="modal-settings" class="collapse">
-								<div class="form-group">
-									<label class="control-label">Team Stats</label>
-									<div data-bind="foreach: allStats">
-										<label class="checkbox-inline">
-											<input type="checkbox" data-bind="checked: selected">
-											<span data-bind="text: label"></span>
-										</label>
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label">Toggle Info</label>
-									<div>
-										<label class="checkbox-inline">
-											<input type="checkbox" data-bind="checked: showScore"> Score
-										</label>
-										<label class="checkbox-inline">
-											<input type="checkbox" data-bind="checked: showFlair"> Flair
-										</label>
-										<label class="checkbox-inline">
-											<input type="checkbox" data-bind="checked: showAuth"> Authentication
-										</label>
-										<label class="checkbox-inline">
-											<input type="checkbox" data-bind="checked: showDegree"> Degree
-										</label>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="teamNameRed" class="control-label">Red team name</label>
-									<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed">
-								</div>
-								<div class="form-group">
-									<label for="teamNameBlue" class="control-label">Blue team name</label>
-									<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue">
-								</div>
-
-								<input type="hidden" name="stats" data-bind="value: selectedStatsString">
-								<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
+							<div id="modal-settings" class="collapse" data-bind="template: 'settings-template'">
 							</div>
 						</div>
 						<div class="modal-footer">
@@ -122,52 +85,12 @@
 			</div>
 		</form>
 
-		<div class="footer">
+		<div class="footer" data-bind="visible: !embed()">
 			<div class="container">
 				<div id="settings" class="collapse">
 					<form method="get">
-						<div class="form-group">
-							<label class="control-label">Team Stats</label>
-							<div data-bind="foreach: allStats">
-								<label class="checkbox-inline">
-									<input type="checkbox" data-bind="checked: selected">
-									<span data-bind="text: label"></span>
-								</label>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label">Toggle Info</label>
-							<div>
-								<label class="checkbox-inline">
-									<input type="checkbox" data-bind="checked: showScore"> Score
-								</label>
-								<label class="checkbox-inline">
-									<input type="checkbox" data-bind="checked: showFlair"> Flair
-								</label>
-								<label class="checkbox-inline">
-									<input type="checkbox" data-bind="checked: showAuth"> Authentication
-								</label>
-								<label class="checkbox-inline">
-									<input type="checkbox" data-bind="checked: showDegree"> Degree
-								</label>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="control-label">Host</label>
-							<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
-						</div>
-
-						<div class="form-group">
-							<label for="teamNameRed" class="control-label">Red team name</label>
-							<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed">
-						</div>
-						<div class="form-group">
-							<label for="teamNameBlue" class="control-label">Blue team name</label>
-							<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue">
-						</div>
-
-						<input type="hidden" name="stats" data-bind="value: selectedStatsString">
-						<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
+						<!-- ko template: 'settings-template' -->
+						<!-- /ko -->
 						<a href="#settings" class="btn btn-xs btn-default" data-toggle="collapse">Close</a>
 						<button type="submit" class="btn btn-xs btn-primary">Reload</button>
 					</form>
@@ -176,12 +99,50 @@
 			</div>
 		</div>
 
-		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
-		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-		<script src="http://tagpro-chord.koalabeast.com:443/socket.io/socket.io.js"></script>
-		<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
-		<script src="knockout.mapping-latest.js"></script>
-		<script src="purl.js"></script>
+		<script type="text/html" id="settings-template">
+			<div class="form-group">
+				<label class="control-label">Team Stats</label>
+				<div data-bind="foreach: allStats">
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: selected">
+						<span data-bind="text: label"></span>
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label">Toggle Info</label>
+				<div>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showScore"> Score
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showFlair"> Flair
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showAuth"> Authentication
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showDegree"> Degree
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label">Host</label>
+				<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com:8000">
+			</div>
+
+			<div class="form-group">
+				<label for="teamNameRed" class="control-label">Red team name</label>
+				<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed">
+			</div>
+			<div class="form-group">
+				<label for="teamNameBlue" class="control-label">Blue team name</label>
+				<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue">
+			</div>
+
+			<input type="hidden" name="stats" data-bind="value: selectedStatsString">
+			<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
+		</script>
 
 		<script type="text/html" id="player-template">
 			<p>
@@ -197,6 +158,14 @@
 			</p>
 		</script>
 
-		<script src="overview2.js"></script>
+		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="http://tagpro-chord.koalabeast.com:443/socket.io/socket.io.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
+		<script src="assets/knockout.mapping-latest.js"></script>
+		<script src="assets/purl.js"></script>
+
+		<script src="assets/models.js"></script>
+		<script src="assets/overview2.js"></script>
 	</body>
 </html>

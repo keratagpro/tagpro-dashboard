@@ -6,7 +6,7 @@
 
 		<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
 		<link href="//code.jquery.com/ui/1.10.4/themes/ui-darkness/jquery-ui.css" rel="stylesheet" media="screen">
-		<link href="styles.css" rel="stylesheet" media="screen">
+		<link href="assets/styles.css" rel="stylesheet" media="screen">
 	</head>
 	<body>
 		<form method="get">
@@ -23,9 +23,15 @@
 								<input type="text" class="form-control" name="host" data-bind="value: host" placeholder="http://tagpro-chord.koalabeast.com/groups/abcdefgh">
 							</div>
 
+							<div style="float: left">
+								<a class="btn btn-link" href="#settings" data-toggle="collapse">Change settings...</a>
+							</div>
 							<p class="text-right">
 								<button type="submit" class="btn btn-primary">Launch</button>
 							</p>
+
+							<div id="settings" class="collapse" data-bind="template: { name: 'settings-template', data: game }">
+							</div>
 						</div>
 						<div class="modal-footer">
 							<p><span class="text-success">ProTip</span>: You can open this dashboard directly from the game or group you are spectating. Drag this bookmarklet into your bookmarks bar and click on it when in a game/group: [<a data-bind="attr: { href: bookmarkletLink }" href="#">TagPro Dashboard</a>]</p>
@@ -52,30 +58,72 @@
 		</div>
 
 		<div class="footer">
-			<div id="settings" class="settings collapse">
-				<div class="panel panel-default">
-					<div class="panel-body">
-						<form>
-							<div class="checkbox">
-								<label>
-									<input type="checkbox" data-bind="checked: resizeMode"> Move/Resize windows
-								</label>
-							</div>
-						</form>
+			<a href="#" class="settings-button text-muted btn btn-link" data-bind="click: function() { resizeMode(!resizeMode()); }"><span class="glyphicon glyphicon-move"></span> Move/Resize</a>
+			<a href="#startDialog" class="settings-button text-muted btn btn-link" data-bind="click: function() { $('#settings').collapse('show'); return true; }" data-toggle="modal"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+		</div>
+
+		<script id="settings-template" type="text/html">
+			<div class="form-group">
+				<label class="checkbox-inline">
+					<input type="checkbox" name="score" value="true" data-bind="checked: showScore"> Show Score
+					<input type="hidden" name="score" value="" data-bind="checked: showScore, disable: showScore">
+				</label>
+				<label class="checkbox-inline">
+					<input type="checkbox" name="players" value="true" data-bind="checked: showPlayers"> Show Players
+					<input type="hidden" name="players" value="" data-bind="checked: showPlayers, disable: showPlayers">
+				</label>
+			</div>
+			<div class="form-group">
+				<label>Team names</label>
+				<div class="row">
+					<div class="col-sm-6">
+						<input class="form-control" type="text" name="teamRed" id="teamNameRed" data-bind="value: teamNameRed" placeholder="Red team">
+					</div>
+					<div class="col-sm-6">
+						<input class="form-control" type="text" name="teamBlue" id="teamNameBlue" data-bind="value: teamNameBlue" placeholder="Blue team">
 					</div>
 				</div>
 			</div>
-			<a href="#settings" class="settings-button text-muted btn btn-link" data-toggle="collapse">Settings</a>
-		</div>
+
+			<div class="form-group">
+				<label class="control-label">Player Info</label>
+				<div>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showFlair"> Flair
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showAuth"> Authentication
+					</label>
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: showDegree"> Degree
+					</label>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="control-label">Team Stats</label>
+				<div data-bind="foreach: allStats">
+					<label class="checkbox-inline">
+						<input type="checkbox" data-bind="checked: selected">
+						<span data-bind="text: label"></span>
+					</label>
+				</div>
+			</div>
+
+			<input type="hidden" name="socketPort" data-bind="value: socketPort">
+			<input type="hidden" name="stats" data-bind="value: selectedStatsString">
+			<input type="hidden" name="player" data-bind="value: selectedPlayerInfoString">
+		</script>
 
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
-		<script src="jquery.ui.resizable.snap.min.js"></script>
-		<script src="knockout.mapping-latest.js"></script>
-		<script src="purl.js"></script>
+		<script src="assets/jquery.ui.resizable.snap.min.js"></script>
+		<script src="assets/knockout.mapping-latest.js"></script>
+		<script src="assets/purl.js"></script>
 
-		<script src="index.js"></script>
+		<script src="assets/models.js"></script>
+		<script src="assets/index.js"></script>
 	</body>
 </html>
