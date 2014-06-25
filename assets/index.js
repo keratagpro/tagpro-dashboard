@@ -58,14 +58,14 @@ var defaultLayout = function() {
 	$('.screen-second').css({
 		left: $(window).width() * 0.66 + "px",
 		width: $(window).width() * 0.34 + "px",
-		height: $(window).height() * 0.40 + "px"
+		height: $(window).height() * 0.50 + "px"
 	});
 
 	$('.screen-overview').css({
 		left: $(window).width() * 0.66 + "px",
-		top: $(window).height() * 0.40 + "px",
+		top: $(window).height() * 0.50 + "px",
 		width: $(window).width() * 0.34 + "px",
-		height: $(window).height() * 0.60 + "px"
+		height: $(window).height() * 0.50 + "px"
 	});
 };
 

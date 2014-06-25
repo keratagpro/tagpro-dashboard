@@ -59,7 +59,7 @@
 
 		<div class="footer">
 			<a href="#" class="settings-button text-muted btn btn-link" data-bind="click: function() { resizeMode(!resizeMode()); }"><span class="glyphicon glyphicon-move"></span> Move/Resize</a>
-			<a href="#startDialog" class="settings-button text-muted btn btn-link" data-bind="click: function() { $('#settings').collapse('show'); return true; }" data-toggle="modal"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+			<a href="#startDialog" class="settings-button text-muted btn btn-link" data-bind="click: function() { $('.modal-footer').hide(); $('#settings').collapse('show'); return true; }" data-toggle="modal"><span class="glyphicon glyphicon-cog"></span> Settings</a>
 		</div>
 
 		<script id="settings-template" type="text/html">
