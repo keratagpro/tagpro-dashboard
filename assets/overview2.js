@@ -103,15 +103,11 @@ var createSocket = function(url, reconnect) {
 	return socket;
 };
 
-var requestSocketUrl = function() {
-	if (!window.parent) {
-		return;
-	}
-
-	window.parent.postMessage({ requestSocketUrl: true }, "*");
-
-	return false;
+var messageListener = function(event) {
+	ko.mapping.fromJS(event.data, {}, game);
 };
+
+window.addEventListener('message', messageListener, false);
 
 $(function() {
 	var url = $.url();
@@ -142,7 +138,7 @@ $(function() {
 		game.score().b(1);
 		game.players.push(new Player({ id: 1, team: 1, name: "Some Ball 1", flag: 2, grip: true, tagpro: true, "s-hold": 100, score: 40, gripCount: 2 }));
 		game.players.push(new Player({ id: 2, team: 2, name: "Some Ball 2", flag: 1, grip: true, bomb: true, "s-hold": 25, score: 20, tagproCount: 2 }));
-		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true, degree: 70 }));
+		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true, degree: 70, flair: { x: 4, y: 5 } }));
 		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4", auth: true, flair: { x: 0, y: 5 }}));
 
 		if (!url.param('embed')) {

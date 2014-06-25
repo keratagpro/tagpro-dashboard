@@ -9,10 +9,22 @@ html {
 	position: relative;
 }
 
+body {
+	background-color: black;
+}
+
+.tagpro-background {
+	background: black url('http://maptest.newcompte.fr/images/background.jpg') no-repeat center center;
+}
+
 .modal {
 	.modal-footer {
 		text-align: left;
 	}
+}
+
+.modal-backdrop.in {
+	opacity: .2 !important;
 }
 
 .footer {

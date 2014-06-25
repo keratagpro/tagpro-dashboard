@@ -1,15 +1,6 @@
 var dashboard;
 var pageUrl;
 
-var messageListener = function(e) {
-	if (e.data.requestSocketUrl) {
-		var url = $.url($('iframe.game').attr('src'));
-		e.source.postMessage({ socketUrl: url.attr('host') + ":" + (url.attr('port') || 8000) }, document.location.href);
-	}
-};
-
-window.addEventListener('message', messageListener, false);
-
 var gameUrl = function(opts) {
 	var serverName;
 	if (opts.serverName) {
@@ -78,19 +69,7 @@ var defaultLayout = function() {
 	});
 };
 
-$(function() {
-	pageUrl = $.url();
-	var host = pageUrl.param('host');
-
-	if (host && host.indexOf("http") !== 0) {
-		host = "http://" + host;
-	}
-
-	dashboard = new Dashboard(pageUrl.data.param.query);
-	ko.applyBindings(dashboard);
-
-	defaultLayout();
-
+var handleResize = function() {
 	var oldWidth = $(window).width();
 	var oldHeight = $(window).height();
 
@@ -105,10 +84,30 @@ $(function() {
 		clearTimeout(resizeTimer);
 		resizeTimer = setTimeout(defaultLayout, 100);
 	});
+};
+
+$(function() {
+	pageUrl = $.url();
+	var host = pageUrl.param('host');
+
+	if (host && host.indexOf("http") !== 0) {
+		host = "http://" + host;
+	}
+
+	dashboard = new Dashboard(pageUrl.data.param.query);
+	ko.applyBindings(dashboard);
+
+	dashboard.game.getData.subscribe(function(val) {
+		$('#overviewFrame')[0].contentWindow.postMessage(val, document.location.href);
+	});
+
+	defaultLayout();
+
+	handleResize();
 
 	if (host) {
 		var socketPort = pageUrl.param('socketPort');
-		var overviewUrl = "overview2.html?" + pageUrl.data.attr.query;
+		var overviewUrl = "overview2.html?embed=true&" + pageUrl.data.attr.query;
 
 		if (!socketPort) {
 			if (host.indexOf("koalabeast.com") !== -1)
@@ -130,4 +129,6 @@ $(function() {
 		$('.screen-overview iframe').attr('src', 'overview2.html?embed=true' + (pageUrl.data.attr.query ? '&' + pageUrl.data.attr.query : ''));
 		$('#startDialog').modal();
 	}
+
+	//$('#overviewFrame').postMessage({}, document.location.href);
 });

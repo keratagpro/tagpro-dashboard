@@ -126,6 +126,8 @@ var Dashboard = function(data) {
 		pos.top(position.top);
 	}.bind(this);
 
+	this.showBackground = ko.observable((data.background == "true") || data.background === undefined);
+
 	this.resizeMode = ko.observable(data.resizeMode);
 
 	this.resizeMode.subscribe(function(newValue) {
@@ -230,9 +232,15 @@ var Game = function(data) {
 	this.host = ko.observable(data.host);
 	this.socketPort = ko.observable(data.socketPort);
 	this.endTime = ko.observable();
-	this.teamNameRed = ko.observable(data.teamRed);
-	this.teamNameBlue = ko.observable(data.teamBlue);
+	this.teamRed = ko.observable(data.teamRed);
+	this.teamBlue = ko.observable(data.teamBlue);
 	this.embed = ko.observable(data.embed && data.embed == "true");
+
+	var scoreRed = parseInt(data.scoreRed, 10);
+	var scoreBlue = parseInt(data.scoreBlue, 10);
+
+	this.scoreRed = ko.observable(isNaN(scoreRed) ? null : scoreRed);
+	this.scoreBlue = ko.observable(isNaN(scoreBlue) ? null : scoreBlue);
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -240,26 +248,35 @@ var Game = function(data) {
 		});
 	}.bind(this);
 
+	this.getData = ko.computed(function() {
+		return {
+			showScore: this.showScore(),
+			showPlayers: this.showPlayers(),
+			stats: this.stats(),
+			player: this.player(),
+			host: this.host(),
+			socketPort: this.socketPort(),
+			teamRed: this.teamRed(),
+			teamBlue: this.teamBlue(),
+			scoreRed: this.scoreRed(),
+			scoreBlue: this.scoreBlue()
+		};
+	}, this, { deferEvaluation: true });
+
 	this.currentUrl = ko.computed(function() {
-		var parts = ["stats=" + this.selectedStatsString()];
+		var data = this.getData();
+		var parts = [];
 
-		var playerInfo = this.selectedPlayerInfoString();
+		for (var key in data) {
+			var key2 = key;
+			if (key == "showScore")
+				key2 = "score";
+			else if (key == "showPlayers")
+				key2 = "players";
 
-		if (playerInfo)
-			parts.push("player=" + playerInfo);
+			parts.push(key2 + "=" + data[key]);
+		}
 		
-		if (this.host())
-			parts.push("host=" + this.host());
-
-		if (this.socketPort())
-			parts.push("socketPort=" + this.socketPort());
-
-		if (this.teamNameRed())
-			parts.push("teamRed=" + this.teamNameRed());
-
-		if (this.teamNameBlue())
-			parts.push("teamBlue=" + this.teamNameBlue());
-
 		return "?" + parts.join("&");
 	}, this, { deferEvaluation: true });
 
@@ -287,15 +304,16 @@ var Game = function(data) {
 		}.bind(this)
 	});
 
-	this.selectedStatIds = ko.computed({
+	this.stats = ko.computed({
 		read: function() {
 			return ko.utils.arrayMap(this.selectedStats(), function(stat) {
 				return stat.id();
-			});
+			}).join(',');
 		},
-		write: function(ids) {
+		write: function(val) {
 			this.selectedStats.removeAll();
 
+			var ids = val.split(',');
 			ids.forEach(function(id) {
 				var stat = ko.utils.arrayFirst(this.allStats(), function(stat) {
 					return stat.id() == id;
@@ -310,12 +328,7 @@ var Game = function(data) {
 		owner: this
 	});
 
-	var selectedStatIds = data.stats !== undefined ? data.stats : 's-hold,score,powerupCount';
-	this.selectedStatIds(selectedStatIds.split(','));
-
-	this.selectedStatsString = ko.computed(function() {
-		return this.selectedStatIds().join(',');
-	}, this);
+	this.stats(data.stats !== undefined ? data.stats : 's-hold,score,powerupCount');
 
 	this.getStatLabel = function(stat) {
 		if (!scoreboard.attributeLabels[stat])
@@ -390,30 +403,42 @@ var Game = function(data) {
 		});
 	}, this);
 
-	var playerInfo = (data.player !== undefined && data.player.split(',')) || ['auth', 'flair'];
+	this.showAuth = ko.observable(false);
+	this.showFlair = ko.observable(false);
+	this.showDegree = ko.observable(false);
+
+	this.player = ko.computed({
+		read: function() {
+			var parts = [];
+
+			if (this.showAuth())
+				parts.push("auth");
+
+			if (this.showFlair())
+				parts.push("flair");
+
+			if (this.showDegree())
+				parts.push("degree");
+
+			return parts.join(",");
+		},
+		write: function(value) {
+			var data = value.split(',');
+			this.showAuth($.inArray('auth', data) !== -1);
+			this.showFlair($.inArray('flair', data) !== -1);
+			this.showDegree($.inArray('degree', data) !== -1);
+		},
+		owner: this
+	});
+
+	this.player(data.player !== undefined ? data.player : 'auth,flair');
+
 	this.showScore = ko.observable((data.score == "true") || data.score === undefined);
 	this.showPlayers = ko.observable((data.players == "true") || data.players === undefined);
-	this.showAuth = ko.observable($.inArray('auth', playerInfo) !== -1);
-	this.showFlair = ko.observable($.inArray('flair', playerInfo) !== -1);
-	this.showDegree = ko.observable($.inArray('degree', playerInfo) !== -1);
 
-	this.selectedPlayerInfoString = ko.computed(function() {
-		var parts = [];
-
-		if (this.showScore())
-			parts.push("score");
-
-		if (this.showAuth())
-			parts.push("auth");
-
-		if (this.showFlair())
-			parts.push("flair");
-
-		if (this.showDegree())
-			parts.push("degree");
-
-		return parts.join(",");
-	}, this);
+	this.showTeams = ko.computed(function() {
+		return !!this.teamRed() || !!this.teamBlue();
+	},this);
 
 	this.currentUrl.subscribe(function() {
 		if (!this.host()) return;
