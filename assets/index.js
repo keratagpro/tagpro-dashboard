@@ -106,7 +106,7 @@ $(function() {
 	handleResize();
 
 	if (host) {
-		var socketPort = pageUrl.param('socketPort');
+		var socketPort = parseInt(pageUrl.param('socketPort'));
 		var overviewUrl = "overview2.html?embed=true&" + pageUrl.data.attr.query;
 
 		if (!socketPort) {
