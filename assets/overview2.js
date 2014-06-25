@@ -88,7 +88,7 @@ var createSocket = function(url, reconnect) {
 			});
 
 			if (player) {
-				ko.mapping.fromJS(playerData, playerMapping, player);
+				ko.mapping.fromJS(playerData, scoreboard.playerMapping, player);
 			}
 			else {
 				game.players.push(new Player(playerData));
