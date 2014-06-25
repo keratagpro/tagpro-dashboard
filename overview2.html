@@ -17,12 +17,12 @@
 						<td colspan="2">
 							<span>
 								<span class="sprite-tiles sprite-redball"></span>
-								<span class="score-prev" title="Previous score" data-bind="visible: $root.scoreRed() !== null, text: '(' + $root.scoreRed() + ')'"></span>
+								<span class="score-prev" title="Previous score" data-bind="visible: $root.scoreRed, text: '(' + (($root.scoreRed() || 0) + r()) + ')'"></span>
 								<span class="score-red" data-bind="text: r"></span>
 							</span> -
 							<span>
 								<span class="score-blue" data-bind="text: b"></span>
-								<span class="score-prev" title="Previous score" data-bind="visible: $root.scoreBlue() !== null, text: '(' + $root.scoreBlue() + ')'"></span>
+								<span class="score-prev" title="Previous score" data-bind="visible: $root.scoreBlue, text: '(' + (($root.scoreBlue() || 0) + b()) + ')'"></span>
 								<span class="sprite-tiles sprite-blueball"></span>
 							</span>
 						</td>
@@ -163,7 +163,7 @@
 					</label>
 				</div>
 			</div>
-			
+
 			<input type="hidden" name="stats" data-bind="value: stats">
 			<input type="hidden" name="player" data-bind="value: player">
 		</script>

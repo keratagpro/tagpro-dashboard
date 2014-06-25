@@ -75,6 +75,22 @@ var scoreboard = (function() {
 	};
 })();
 
+ko.numericObservable = function(initialValue) {
+    var _actual = ko.observable(initialValue);
+
+    var result = ko.dependentObservable({
+        read: function() {
+            return _actual();
+        },
+        write: function(newValue) {
+            var parsedValue = parseFloat(newValue);
+            _actual(isNaN(parsedValue) ? newValue : parsedValue);
+        }
+    });
+
+    return result;
+};
+
 var Position = function(data) {
 	this.left = ko.observable(data.left);
 	this.top = ko.observable(data.top);
@@ -236,11 +252,11 @@ var Game = function(data) {
 	this.teamBlue = ko.observable(data.teamBlue);
 	this.embed = ko.observable(data.embed && data.embed == "true");
 
-	var scoreRed = parseInt(data.scoreRed, 10);
-	var scoreBlue = parseInt(data.scoreBlue, 10);
+	this.scoreRed = ko.numericObservable(0);
+	this.scoreBlue = ko.numericObservable(0);
 
-	this.scoreRed = ko.observable(isNaN(scoreRed) ? null : scoreRed);
-	this.scoreBlue = ko.observable(isNaN(scoreBlue) ? null : scoreBlue);
+	this.scoreRed(data.scoreRed);
+	this.scoreBlue(data.scoreBlue);
 
 	this.removePlayer = function(id) {
 		this.players.remove(function(player) {
@@ -259,7 +275,8 @@ var Game = function(data) {
 			teamRed: this.teamRed(),
 			teamBlue: this.teamBlue(),
 			scoreRed: this.scoreRed(),
-			scoreBlue: this.scoreBlue()
+			scoreBlue: this.scoreBlue(),
+			embed: this.embed()
 		};
 	}, this, { deferEvaluation: true });
 
