@@ -383,7 +383,7 @@ var Game = function(data) {
 		owner: this
 	}).extend({ persist: 'stats' });
 
-	if (this.stats() === undefined)
+	if (!this.stats())
 		this.stats(data.stats !== undefined ? data.stats : 's-hold,score,powerupCount');
 
 	this.getStatLabel = function(stat) {
@@ -487,7 +487,7 @@ var Game = function(data) {
 		owner: this
 	}).extend({ persist: 'player' });
 
-	if (this.player() === undefined)
+	if (!this.player())
 		this.player(data.player !== undefined ? data.player : 'auth,flair');
 
 	this.showScore = ko.observable((data.score == "true") || data.score === undefined).extend({ persist: 'score' });
