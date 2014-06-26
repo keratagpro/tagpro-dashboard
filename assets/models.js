@@ -92,27 +92,59 @@ ko.numericObservable = function(initialValue) {
 };
 
 var Position = function(data) {
+	if (typeof data == 'string') {
+		var parts = data.split(',');
+		if (parts.length == 4) {
+			data = {
+				left: parts[0],
+				top: parts[1],
+				width: parts[2],
+				height: parts[3]
+			};
+		}
+	}
+
 	this.left = ko.observable(data.left);
 	this.top = ko.observable(data.top);
 	this.width = ko.observable(data.width);
 	this.height = ko.observable(data.height);
 
+	this.isDefault = ko.computed(function() {
+		return this.left() == data.left &&
+			this.top() == data.top &&
+			this.width() == data.width &&
+			this.height() == data.height;
+	}, this);
+
+	this.getCSS = ko.computed(function() {
+		return {
+			left: this.left() + "%",
+			top: this.top() + "%",
+			width: this.width() + "%",
+			height: this.height() + "%"
+		};
+	}, this);
+
 	this.getString = ko.computed(function() {
-		parts = [this.left(), this.top(), this.width(), this.height()];
-		return parts.join(',');
+		return parseFloat(this.left()).toFixed(2) + "," +
+			parseFloat(this.top()).toFixed(2) + "," +
+			parseFloat(this.width()).toFixed(2) + "," +
+			parseFloat(this.height()).toFixed(2);
 	}, this);
 };
 
 var Dashboard = function(data) {
 	var self = this;
 
+	data.embed = "true";
+
 	this.game = new Game(data);
 
 	this.host = ko.observable(data.host);
 
-	this.positionMain = ko.observable(new Position((data.posMain || '').split(',')));
-	this.positionSecond = ko.observable(new Position((data.posSecond || '').split(',')));
-	this.positionOverview = ko.observable(new Position((data.posOverview || '').split(',')));
+	this.positionMain = ko.observable(new Position((data.posMain || '0,0,66,100')));
+	this.positionSecond = ko.observable(new Position((data.posSecond || '66,0,34,50')));
+	this.positionOverview = ko.observable(new Position((data.posOverview || '66,50,34,50')));
 
 	this.currentUrl = ko.computed(function() {
 		var parts = [];
@@ -129,17 +161,23 @@ var Dashboard = function(data) {
 	});
 
 	this.setSize = function(name, size) {
+		var width = $(document).width();
+		var height = $(document).height();
+
 		attr = "position" + name.charAt(0).toUpperCase() + name.slice(1);
 		var pos = this[attr]();
-		pos.width(size.width);
-		pos.height(size.height);
+		pos.width(size.width / width * 100);
+		pos.height(size.height / height * 100);
 	}.bind(this);
 
 	this.setPosition = function(name, position) {
+		var width = $(document).width();
+		var height = $(document).height();
+
 		attr = "position" + name.charAt(0).toUpperCase() + name.slice(1);
 		var pos = this[attr]();
-		pos.left(position.left);
-		pos.top(position.top);
+		pos.left(position.left / width * 100);
+		pos.top(position.top / height * 100);
 	}.bind(this);
 
 	this.showBackground = ko.observable((data.background == "true") || data.background === undefined);
@@ -164,7 +202,7 @@ var Dashboard = function(data) {
 				});
 				$('.draggable').draggable({
 					snap: true,
-					containment: 'window',
+					containment: 'document',
 					stack: '.screen',
 					stop: function(ev, ui) {
 						self.setPosition($(this).data('name'), ui.position);
@@ -330,7 +368,7 @@ var Game = function(data) {
 		write: function(val) {
 			this.selectedStats.removeAll();
 
-			var ids = val.split(',');
+			var ids = (val || '').split(',');
 			ids.forEach(function(id) {
 				var stat = ko.utils.arrayFirst(this.allStats(), function(stat) {
 					return stat.id() == id;
@@ -343,9 +381,10 @@ var Game = function(data) {
 			}.bind(this));
 		},
 		owner: this
-	});
+	}).extend({ persist: 'stats' });
 
-	this.stats(data.stats !== undefined ? data.stats : 's-hold,score,powerupCount');
+	if (this.stats() === undefined)
+		this.stats(data.stats !== undefined ? data.stats : 's-hold,score,powerupCount');
 
 	this.getStatLabel = function(stat) {
 		if (!scoreboard.attributeLabels[stat])
@@ -440,18 +479,19 @@ var Game = function(data) {
 			return parts.join(",");
 		},
 		write: function(value) {
-			var data = value.split(',');
+			var data = (value || '').split(',');
 			this.showAuth($.inArray('auth', data) !== -1);
 			this.showFlair($.inArray('flair', data) !== -1);
 			this.showDegree($.inArray('degree', data) !== -1);
 		},
 		owner: this
-	});
+	}).extend({ persist: 'player' });
 
-	this.player(data.player !== undefined ? data.player : 'auth,flair');
+	if (this.player() === undefined)
+		this.player(data.player !== undefined ? data.player : 'auth,flair');
 
-	this.showScore = ko.observable((data.score == "true") || data.score === undefined);
-	this.showPlayers = ko.observable((data.players == "true") || data.players === undefined);
+	this.showScore = ko.observable((data.score == "true") || data.score === undefined).extend({ persist: 'score' });
+	this.showPlayers = ko.observable((data.players == "true") || data.players === undefined).extend({ persist: 'players' });
 
 	this.showTeams = ko.computed(function() {
 		return !!this.teamRed() || !!this.teamBlue();

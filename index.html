@@ -121,6 +121,10 @@
 				</div>
 			</div>
 
+			<input type="hidden" name="posMain" data-bind="disable: $root.positionMain().isDefault(), value: $root.positionMain().getString()">
+			<input type="hidden" name="posSecond" data-bind="disable: $root.positionSecond().isDefault(), value: $root.positionSecond().getString()">
+			<input type="hidden" name="posOverview" data-bind="disable: $root.positionOverview().isDefault(), value: $root.positionOverview().getString()">
+
 			<input type="hidden" name="socketPort" data-bind="enable: socketPort, value: socketPort">
 			<input type="hidden" name="stats" data-bind="value: stats">
 			<input type="hidden" name="player" data-bind="value: player">
@@ -132,6 +136,7 @@
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
 		<script src="assets/jquery.ui.resizable.snap.min.js"></script>
 		<script src="assets/knockout.mapping-latest.js"></script>
+		<script src="assets/knockout.persist.min.js"></script>
 		<script src="assets/purl.js"></script>
 
 		<script src="assets/models.js"></script>
