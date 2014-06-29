@@ -42,8 +42,15 @@ $(function() {
 	defaultLayout();
 
 	handleResize();
-	
-	var overviewUrl = 'overview2.html?embed=true';
+
+	if (host) {
+		$('.screen-main iframe, .screen-second iframe').attr('src', host);
+	}
+	else {
+		$('#startDialog').modal();
+	}
+
+	var overviewUrl = 'overview2.html';
 
 	var socketPort = parseInt(pageUrl.param('socketPort'), 10);
 	if (!socketPort && host) {
@@ -56,17 +63,14 @@ $(function() {
 		else
 			socketPort = 443;
 
-		overviewUrl += "&socketPort=" + socketPort;
+		overviewUrl += "?socketPort=" + socketPort;
 	}
 
-	if (host) {
-		$('.screen-main iframe, .screen-second iframe').attr('src', host);
+	if (pageUrl.data.attr.query) {
+		var separator = overviewUrl.indexOf('?') !== -1 ? '&' : '?';
+		overviewUrl += separator + pageUrl.data.attr.query;
 	}
-	else {
-		$('#startDialog').modal();
-	}
-
-	overviewUrl += (pageUrl.data.attr.query ? '&' + pageUrl.data.attr.query : '');
+	
 	$('.screen-overview iframe').attr('src', overviewUrl).on('load', function() {
 		dashboard.game.getData.subscribe(updateOverview);
 		updateOverview(dashboard.game.getData());

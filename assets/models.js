@@ -71,7 +71,9 @@ var scoreboard = (function() {
 		powerupAttributes: powerupAttributes,
 		summableAttributes: summableAttributes,
 		attributes: attributes,
-		attributeLabelsArray: attributeLabelsArray
+		attributeLabels: attributeLabels,
+		attributeLabelsArray: attributeLabelsArray,
+		playerMapping: playerMapping
 	};
 })();
 
@@ -135,8 +137,6 @@ var Position = function(data) {
 
 var Dashboard = function(data) {
 	var self = this;
-
-	data.embed = "true";
 
 	this.game = new Game(data);
 
@@ -288,7 +288,14 @@ var Game = function(data) {
 	this.endTime = ko.observable();
 	this.teamRed = ko.observable(data.teamRed);
 	this.teamBlue = ko.observable(data.teamBlue);
-	this.embed = ko.observable(data.embed && data.embed == "true");
+	this.embed = ko.computed(function() {
+		try {
+			return window.self !== window.top;
+		}
+		catch(e) {
+			return true;
+		}
+	}, this);
 
 	this.scoreRed = ko.numericObservable(0);
 	this.scoreBlue = ko.numericObservable(0);
@@ -314,7 +321,7 @@ var Game = function(data) {
 			teamBlue: this.teamBlue(),
 			scoreRed: this.scoreRed(),
 			scoreBlue: this.scoreBlue(),
-			embed: this.embed()
+			embed: this.embed && this.embed()
 		};
 	}, this, { deferEvaluation: true });
 

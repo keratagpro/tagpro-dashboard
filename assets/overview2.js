@@ -30,7 +30,6 @@ var createGroupSocket = function(url) {
 
 		if (playerId) {
 			var url = $.url(game.host()).data.attr;
-			console.log(url);
 			game.host(url.protocol + "://" + url.host + ":" + port);
 			location.reload();
 		}
@@ -141,7 +140,7 @@ $(function() {
 		game.players.push(new Player({ id: 3, team: 1, name: "Some Ball 3", dead: true, degree: 70, flair: { x: 4, y: 5 } }));
 		game.players.push(new Player({ id: 4, team: 2, name: "Some Ball 4", auth: true, flair: { x: 0, y: 5 }}));
 
-		if (!url.param('embed')) {
+		if (!game.embed()) {
 			$('#startDialog').modal();
 		}
 	}
